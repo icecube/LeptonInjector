@@ -60,6 +60,9 @@ class Controller{
         // verify acceptable arguments
         void Verify();
 
+        bool configured = false;
+        
+
     public:
         // default constructor will just use some default minimal injection setup 
         Controller();
@@ -86,6 +89,7 @@ class Controller{
         void setSeed( uint seedno ){this->seed = seedno ;}
         // executes the injector process with the configurated parameters 
         void Execute(); 
+        void Configure();
 
 
 
