@@ -1,9 +1,9 @@
 #include <fstream>
 
-#include <LeptonInjector/LeptonInjector.h>
-#include <LeptonInjector/BasicInjectionConfiguration.h>
-#include <LeptonInjector/Controller.h>
-#include <LeptonInjector/Particle.h>
+#include <LeptonInjector.h>
+#include <BasicInjectionConfiguration.h>
+#include <Controller.h>
+#include <Particle.h>
 
 #include "tools.h"
 

@@ -64,32 +64,32 @@ TEST(compute_particle_speed){
 TEST(interaction_types){
 	//CC
 	//nu_e
-	ENSURE_EQUAL(deduceInitialType(Particle::EMinus,Particle::Hadrons),Particle::NuE);
-	ENSURE_EQUAL(deduceInitialType(Particle::EPlus,Particle::Hadrons),Particle::NuEBar);
+	ENSURE_EQUAL(int(deduceInitialType(Particle::EMinus,Particle::Hadrons)),int(Particle::NuE));
+	ENSURE_EQUAL(int(deduceInitialType(Particle::EPlus,Particle::Hadrons)),int(Particle::NuEBar));
 	//nu_mu
-	ENSURE_EQUAL(deduceInitialType(Particle::MuMinus,Particle::Hadrons),Particle::NuMu);
-	ENSURE_EQUAL(deduceInitialType(Particle::MuPlus,Particle::Hadrons),Particle::NuMuBar);
+	ENSURE_EQUAL(int(deduceInitialType(Particle::MuMinus,Particle::Hadrons)),int(Particle::NuMu));
+	ENSURE_EQUAL(int(deduceInitialType(Particle::MuPlus,Particle::Hadrons)),int(Particle::NuMuBar));
 	//nu_tau
-	ENSURE_EQUAL(deduceInitialType(Particle::TauMinus,Particle::Hadrons),Particle::NuTau);
-	ENSURE_EQUAL(deduceInitialType(Particle::TauPlus,Particle::Hadrons),Particle::NuTauBar);
+	ENSURE_EQUAL(int(deduceInitialType(Particle::TauMinus,Particle::Hadrons)),int(Particle::NuTau));
+	ENSURE_EQUAL(int(deduceInitialType(Particle::TauPlus,Particle::Hadrons)),int(Particle::NuTauBar));
 	//NC
 	//nu_e
-	ENSURE_EQUAL(deduceInitialType(Particle::NuE,Particle::Hadrons),Particle::NuE);
-	ENSURE_EQUAL(deduceInitialType(Particle::NuEBar,Particle::Hadrons),Particle::NuEBar);
+	ENSURE_EQUAL(int(deduceInitialType(Particle::NuE,Particle::Hadrons)),int(Particle::NuE));
+	ENSURE_EQUAL(int(deduceInitialType(Particle::NuEBar,Particle::Hadrons)),int(Particle::NuEBar));
 	//nu_mu
-	ENSURE_EQUAL(deduceInitialType(Particle::NuMu,Particle::Hadrons),Particle::NuMu);
-	ENSURE_EQUAL(deduceInitialType(Particle::NuMuBar,Particle::Hadrons),Particle::NuMuBar);
+	ENSURE_EQUAL(int(deduceInitialType(Particle::NuMu,Particle::Hadrons)),int(Particle::NuMu));
+	ENSURE_EQUAL(int(deduceInitialType(Particle::NuMuBar,Particle::Hadrons)),int(Particle::NuMuBar));
 	//nu_tau
-	ENSURE_EQUAL(deduceInitialType(Particle::NuTau,Particle::Hadrons),Particle::NuTau);
-	ENSURE_EQUAL(deduceInitialType(Particle::NuTauBar,Particle::Hadrons),Particle::NuTauBar);
+	ENSURE_EQUAL(int(deduceInitialType(Particle::NuTau,Particle::Hadrons)),int(Particle::NuTau));
+	ENSURE_EQUAL(int(deduceInitialType(Particle::NuTauBar,Particle::Hadrons)),int(Particle::NuTauBar));
 	//GR
-	ENSURE_EQUAL(deduceInitialType(Particle::EMinus,Particle::NuEBar),Particle::NuEBar);
-	ENSURE_EQUAL(deduceInitialType(Particle::EPlus,Particle::NuE),Particle::NuEBar);
-	ENSURE_EQUAL(deduceInitialType(Particle::MuMinus,Particle::NuMuBar),Particle::NuEBar);
-	ENSURE_EQUAL(deduceInitialType(Particle::MuPlus,Particle::NuMu),Particle::NuEBar);
-	ENSURE_EQUAL(deduceInitialType(Particle::TauMinus,Particle::NuTauBar),Particle::NuEBar);
-	ENSURE_EQUAL(deduceInitialType(Particle::TauPlus,Particle::NuTau),Particle::NuEBar);
-	ENSURE_EQUAL(deduceInitialType(Particle::Hadrons,Particle::Hadrons),Particle::NuEBar);
+	ENSURE_EQUAL(int(deduceInitialType(Particle::EMinus,Particle::NuEBar)),int(Particle::NuEBar));
+	ENSURE_EQUAL(int(deduceInitialType(Particle::EPlus,Particle::NuE)),int(Particle::NuEBar));
+	ENSURE_EQUAL(int(deduceInitialType(Particle::MuMinus,Particle::NuMuBar)),int(Particle::NuEBar));
+	ENSURE_EQUAL(int(deduceInitialType(Particle::MuPlus,Particle::NuMu)),int(Particle::NuEBar));
+	ENSURE_EQUAL(int(deduceInitialType(Particle::TauMinus,Particle::NuTauBar)),int(Particle::NuEBar));
+	ENSURE_EQUAL(int(deduceInitialType(Particle::TauPlus,Particle::NuTau)),int(Particle::NuEBar));
+	ENSURE_EQUAL(int(deduceInitialType(Particle::Hadrons,Particle::Hadrons)),int(Particle::NuEBar));
 	
 	//Other combinations should be rejected
 	try{
