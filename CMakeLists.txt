@@ -115,6 +115,32 @@ ELSE(NOT PYTHON FOUND)
     MESSAGE("-- no python. skipping")
 ENDIF(PYTHON_FOUND)
 
+ENABLE_TESTING()
+LIST(APPEND TEST_SOURCES
+    ${CMAKE_SOURCE_DIR}/private/test/main.cxx
+    ${CMAKE_SOURCE_DIR}/private/test/test-controller.cxx
+    ${CMAKE_SOURCE_DIR}/private/test/tools.cxx
+    ${CMAKE_SOURCE_DIR}/private/test/Utils.cxx
+)
+
+ADD_EXECUTABLE(lepton-test
+    ${TEST_SOURCES}
+)
+
+TARGET_LINK_LIBRARIES(lepton-test
+    lepton_injector)
+
+ADD_TEST(lepton-test lepton-test
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/private/test
+)
+
+LIST (APPEND ALL_TESTS
+    lepton-test
+)
+
+ADD_CUSTOM_TARGET(check
+    COMMAND ${CMAKE_CTEST_COMMAND}
+    DEPENDS ${ALL_TESTS})
 
 MESSAGE("")
 MESSAGE("Done!")
