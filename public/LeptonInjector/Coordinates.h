@@ -65,6 +65,9 @@ namespace LeptonInjector {
 			
 			double zenith;
 			double azimuth;
+
+			// calculates the angle between the self and this other angle 
+			double Angle( LI_Direction& rhs) const;
 	};
 	
 
@@ -103,6 +106,7 @@ namespace LeptonInjector {
 
 	// Takes a direciton, rotates it about the Y-axis by the zenith amount, then about the Z axis by the azimuth amount
 	LI_Direction rotateRelative(const LI_Direction& base, double zenith, double azimuth);
+
 
 
 } // end namespace LeptonInjector

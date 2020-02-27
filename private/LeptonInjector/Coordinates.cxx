@@ -44,6 +44,16 @@ namespace LeptonInjector {
 		this->zenith  = acos( vec.at(2)/ vec.Magnitude() );
 	}
 
+	double LI_Direction::Angle( LI_Direction& rhs) const{
+		// we 
+		LI_Position pos1 = LI_Direction(zenith, azimuth)*1.0;
+		LI_Position pos2 = LI_Direction( rhs.zenith, rhs.azimuth)*1.0;
+
+		double dot = pos1*pos2;
+		return( acos( dot ) );
+
+	}
+
 
 
 	// define the LI_Position constructors and member functions 
