@@ -17,6 +17,8 @@ namespace LeptonInjector {
         this->cylinderRadius = 1200*Constants::m;
         this->cylinderHeight = 1200*Constants::m;
 
+        this->Verify();
+
     }
 
     // constructor if the user only provides one injector and no parameters
@@ -35,6 +37,8 @@ namespace LeptonInjector {
         this->endcapLength = 1200*Constants::m;
         this->cylinderRadius = 1200*Constants::m;
         this->cylinderHeight = 1200*Constants::m;
+
+        this->Verify();
     }
 
    
@@ -59,12 +63,31 @@ namespace LeptonInjector {
         this->cylinderRadius  = cylinderRadius;
         this->cylinderHeight  = cylinderHeight;
 
+        this->Verify();
     }
 
+    void Controller::Verify(){
+        // sanity check! 
+        if (this->minimumEnergy <= 0 ){ std::cout<< "minimum energy must be positive" << std::endl; throw; }
+        if (this->maximumEnergy <= 0 ){ std::cout<<  "maximum energy must be positive"<< std::endl; throw; }
+        if (this->minimumEnergy > this->maximumEnergy ){ std::cout<<  "Max energy must be greater or equal to minimum energy"<< std::endl; throw; }
+        if (this->minimumAzimuth < 0 ){ std::cout<<  "minimum azimuth must be positive"<< std::endl; throw; }
+        if (this->maximumAzimuth > 2*Constants::pi ){ std::cout<<  "maximum azimuth must be less than 2pi"<< std::endl; throw; }
+        if (this->minimumAzimuth > this->maximumAzimuth ){ std::cout<<  "Max azimuth must be greater or equal to min."<< std::endl; throw; }
+        if (this->minimumZenith < 0.0 ){ std::cout<<  "minimum zenith must be positive"<< std::endl; throw;  }
+        if (this->minimumZenith > Constants::pi ){ std::cout<<  "maximum zenith must be less than or equal to pi"<< std::endl; throw;  }
+        if (this->minimumZenith >this->maximumZenith){std::cout<<  "Max zenith must be greater or equal to min."<< std::endl; throw; }
+    }
 
     void Controller::AddInjector( MinimalInjectionConfiguration configs_received ){
         std::cout << "Adding Injector." << std::endl;
         this->configs.push_back( configs_received );
+
+        // if the generators were already configured, clear out the generators
+        if (configured){
+            generators.clear();
+            configured = false;
+        }
     }
 
     void Controller::SetEarthModel( std::string new_name ){
@@ -79,28 +102,20 @@ namespace LeptonInjector {
         this->lic_file = lic_file_;
     }
 
-    void Controller::Execute(){
-        // setup the injectors! 
-        std::cout << "Executing Injectors" << std::endl;
+    void Controller::Configure(){
+        if (configured){
+            return;
+        }
 
-        bool hasRanged=false, hasVolume=false;
+        std::cout << "Configuring" << std::endl;
+
+                bool hasRanged=false, hasVolume=false;
 		for(std::vector<MinimalInjectionConfiguration>::const_iterator genSet=this->configs.begin(), end=this->configs.end(); genSet!=end; genSet++){
 			hasRanged |= genSet->ranged;
 			hasVolume |= !genSet->ranged;
 		}
 
         (*this->random).set_seed(seed);
-
-        // sanity check! 
-        if (this->minimumEnergy <= 0 ){ std::cout<< "minimum energy must be positive" << std::endl; throw; }
-        if (this->maximumEnergy <= 0 ){ std::cout<<  "maximum energy must be positive"<< std::endl; throw; }
-        if (this->minimumEnergy > this->maximumEnergy ){ std::cout<<  "Max energy must be greater or equal to minimum energy"<< std::endl; throw; }
-        if (this->minimumAzimuth < 0 ){ std::cout<<  "minimum azimuth must be positive"<< std::endl; throw; }
-        if (this->maximumAzimuth > 2*Constants::pi ){ std::cout<<  "maximum azimuth must be less than 2pi"<< std::endl; throw; }
-        if (this->minimumAzimuth > this->maximumAzimuth ){ std::cout<<  "Max azimuth must be greater or equal to min."<< std::endl; throw; }
-        if (this->minimumZenith < 0.0 ){ std::cout<<  "minimum zenith must be positive"<< std::endl; throw;  }
-        if (this->minimumZenith > Constants::pi ){ std::cout<<  "maximum zenith must be less than or equal to pi"<< std::endl; throw;  }
-        if (this->minimumZenith >this->maximumZenith){std::cout<<  "Max zenith must be greater or equal to min."<< std::endl; throw; }
 
         // first, construct the template injector configuration objects
         // with only those criteria shared between Configurations 
@@ -159,7 +174,15 @@ namespace LeptonInjector {
             }
   
         } // end for loop constructing generators 
-        
+
+        configured = true;
+    }
+
+    void Controller::Execute(){
+        // setup the injectors! 
+        std::cout << "Executing Injectors" << std::endl;
+
+        Configure();
 
         // open the hdf5 file
 

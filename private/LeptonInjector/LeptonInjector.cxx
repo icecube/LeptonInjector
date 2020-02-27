@@ -7,16 +7,14 @@
 // namespace constants = boost::math::constants;
 
 namespace LeptonInjector{
-	
-		
-	//--------------
-	//Config objects
 
-	
-
-	//-----------
-	//Module base
-
+	MinimalInjectionConfiguration::MinimalInjectionConfiguration():
+		events(1), 
+		finalType1(Particle::EMinus),
+		finalType2(Particle::Hadrons),
+		crossSectionPath(""),
+		totalCrossSectionPath(""),
+		ranged(true){}
 
 	LeptonInjectorBase::LeptonInjectorBase(){
 		eventsGenerated = 0;
@@ -25,16 +23,6 @@ namespace LeptonInjector{
 		// also do nothing with this...
 		//config = BasicInjectionConfiguration();
 	}
-
-/*
-	LeptonInjectorBase::LeptonInjectorBase(BasicInjectionConfiguration& config, std::shared_ptr<LI_random> _random):
-	config(config),
-	eventsGenerated(0),
-	wroteConfigFrame(false),
-	suspendOnCompletion(true),
-	random(_random){
-	}
-*/	
 
 	
 	void LeptonInjectorBase::Configure(MinimalInjectionConfiguration basic){// , std::shared_ptr<LI_random> pass){
