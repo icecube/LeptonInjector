@@ -30,6 +30,7 @@ namespace LeptonInjector{
 	struct MinimalInjectionConfiguration{
 		// The below  puts in a constructor for the MinimalInjectionConfiguration. 
 		// you just pass the things in order and BAM
+		MinimalInjectionConfiguration();
 		MinimalInjectionConfiguration(unsigned int events,
 		  Particle::ParticleType finalType1, Particle::ParticleType finalType2,
 		  const std::string& crossSectionPath, const std::string& totalCrossSectionPath,

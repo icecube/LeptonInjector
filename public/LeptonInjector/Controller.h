@@ -26,6 +26,7 @@ class Controller{
         // seeds the random number generator 
         uint seed = 100;
 
+
         // overall generation parameters
         double minimumEnergy, maximumEnergy, powerlawIndex,
                 minimumAzimuth, maximumAzimuth, minimumZenith, maximumZenith;
@@ -55,6 +56,9 @@ class Controller{
 
         // shared pointer to the object charged with interacting with the OS
         std::shared_ptr<DataWriter> datawriter = std::make_shared<DataWriter>();
+
+        // verify acceptable arguments
+        void Verify();
 
     public:
         // default constructor will just use some default minimal injection setup 
