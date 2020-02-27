@@ -3,9 +3,9 @@
 
 #include <cmath>
 
-#include <LeptonInjector/LeptonInjector.h>
+#include <LeptonInjector.h>
 #include <EarthModelService.h>
-
+#include <Particle.h>
 
 #include <cmath>
 #include <map> //used by a test registry
@@ -79,8 +79,6 @@ do{ \
 
 std::map<std::string,void(*)()>& test_registry();
 
-// extern std::map<std::string,void(*)()> test_registry;
-
 struct register_test{
 	register_test(const std::string& test_name, void(*test)()){
 		test_registry().insert(std::make_pair(test_name,test));
@@ -95,16 +93,16 @@ struct register_test{
 
 // --------------------------------------------------------------
 
-// extern I3Context context;
 extern const std::string earthModelName;
 extern const std::string defaultCrosssectionPath;
 extern const std::string defaultTotalCrosssectionPath;
 
-extern std::shared_ptr<LeptonInjector::LI_Random> randomService;
+extern std::shared_ptr<LeptonInjector::LI_random> randomService;
 extern std::shared_ptr<earthmodel::EarthModelService> earthmodelService;
+extern std::shared_ptr<LeptonInjector::MinimalInjectionConfiguration> minimal_ranged;
+extern std::shared_ptr<LeptonInjector::MinimalInjectionConfiguration> minimal_volume;
 
-void ConfigureStandardParams(I3Module& mod);
-void ConfigureEnergyRange(I3Module& mod, double minEnergy, double maxEnergy);
+
 void resetRandomState();
 
 
