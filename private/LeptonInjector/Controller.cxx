@@ -1,5 +1,5 @@
 #include "Controller.h"
-
+#include <stdexcept>
 
 namespace LeptonInjector {
 
@@ -68,15 +68,15 @@ namespace LeptonInjector {
 
     void Controller::Verify(){
         // sanity check! 
-        if (this->minimumEnergy <= 0 ){ std::cout<< "minimum energy must be positive" << std::endl; throw; }
-        if (this->maximumEnergy <= 0 ){ std::cout<<  "maximum energy must be positive"<< std::endl; throw; }
-        if (this->minimumEnergy > this->maximumEnergy ){ std::cout<<  "Max energy must be greater or equal to minimum energy"<< std::endl; throw; }
-        if (this->minimumAzimuth < 0 ){ std::cout<<  "minimum azimuth must be positive"<< std::endl; throw; }
-        if (this->maximumAzimuth > 2*Constants::pi ){ std::cout<<  "maximum azimuth must be less than 2pi"<< std::endl; throw; }
-        if (this->minimumAzimuth > this->maximumAzimuth ){ std::cout<<  "Max azimuth must be greater or equal to min."<< std::endl; throw; }
-        if (this->minimumZenith < 0.0 ){ std::cout<<  "minimum zenith must be positive"<< std::endl; throw;  }
-        if (this->minimumZenith > Constants::pi ){ std::cout<<  "maximum zenith must be less than or equal to pi"<< std::endl; throw;  }
-        if (this->minimumZenith >this->maximumZenith){std::cout<<  "Max zenith must be greater or equal to min."<< std::endl; throw; }
+        if (this->minimumEnergy <= 0 ){ std::cout<< "minimum energy must be positive" << std::endl; throw std::runtime_error(""); }
+        if (this->maximumEnergy <= 0 ){ std::cout<<  "maximum energy must be positive"<< std::endl; throw  std::runtime_error(""); }
+        if (this->minimumEnergy > this->maximumEnergy ){ std::cout<<  "Max energy must be greater or equal to minimum energy"<< std::endl; throw  std::runtime_error(""); }
+        if (this->minimumAzimuth < 0 ){ std::cout<<  "minimum azimuth must be positive"<< std::endl; throw  std::runtime_error(""); }
+        if (this->maximumAzimuth > 2*Constants::pi ){ std::cout<<  "maximum azimuth must be less than 2pi"<< std::endl; throw  std::runtime_error(""); }
+        if (this->minimumAzimuth > this->maximumAzimuth ){ std::cout<<  "Max azimuth must be greater or equal to min."<< std::endl; throw  std::runtime_error(""); }
+        if (this->minimumZenith < 0.0 ){ std::cout<<  "minimum zenith must be positive"<< std::endl; throw  std::runtime_error("");  }
+        if (this->minimumZenith > Constants::pi ){ std::cout<<  "maximum zenith must be less than or equal to pi"<< std::endl; throw  std::runtime_error("");  }
+        if (this->minimumZenith >this->maximumZenith){std::cout<<  "Max zenith must be greater or equal to min."<< std::endl; throw  std::runtime_error(""); }
     }
 
     void Controller::AddInjector( MinimalInjectionConfiguration configs_received ){

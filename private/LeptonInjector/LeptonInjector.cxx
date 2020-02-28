@@ -35,42 +35,68 @@ namespace LeptonInjector{
 		
 		//std::cout << "wrote more" << std::endl;
 		
-		if(this->config.events==0)
-			throw("there's no point in running this if you don't generate at least one event");
-		if(this->config.energyMinimum<=0)
-			throw(": minimum energy must be positive");
-		if(this->config.energyMaximum<=0)
-			throw(": maximum energy must be positive");
-		if(this->config.energyMaximum<this->config.energyMinimum)
-			throw(": maximum energy must be greater than or equal to minimum energy");
-		if(this->config.azimuthMinimum<0.0)
-			throw(": minimum azimuth angle must be greater than or equal to zero");
-		if(this->config.azimuthMaximum>2*Constants::pi)
-			throw(": maximum azimuth angle must be less than or equal to 2 pi");
-		if(this->config.azimuthMinimum>this->config.azimuthMaximum)
-			throw(": minimum azimuth angle must be less than or equal to maximum azimuth angle");
-		if(this->config.zenithMinimum<0.0)
-			throw(": minimum zenith angle must be greater than or equal to zero");
-		if(this->config.zenithMaximum>Constants::pi)
-			throw(": maximum zenith angle must be less than or equal to pi");
-		if(this->config.zenithMinimum>this->config.zenithMaximum)
-			throw(": minimum zenith angle must be less than or equal to maximum zenith angle");
+		if(this->config.events==0){
+			std::cout<< "there's no point in running this if you don't generate at least one event" <<std::endl;
+			throw std::runtime_error("");
+		}
+		if(this->config.energyMinimum<=0){
+			std::cout << ": minimum energy must be positive" << std::endl;
+			throw std::runtime_error("");
+		}
+		if(this->config.energyMaximum<=0){
+			std::cout<<": maximum energy must be positive" << std::endl;
+			throw std::runtime_error("");
+		}
+		if(this->config.energyMaximum<this->config.energyMinimum){
+			std::cout << ": maximum energy must be greater than or equal to minimum energy" << std::endl;
+			throw std::runtime_error("");
+		}
+		if(this->config.azimuthMinimum<0.0){
+			std::cout << ": minimum azimuth angle must be greater than or equal to zero" << std::endl;
+			throw std::runtime_error("");
+		}
+		if(this->config.azimuthMaximum>2*Constants::pi){
+			std::cout << ": maximum azimuth angle must be less than or equal to 2 pi" <<std::endl;
+			throw std::runtime_error("");
+		}
+		if(this->config.azimuthMinimum>this->config.azimuthMaximum){
+			std::cout<<": minimum azimuth angle must be less than or equal to maximum azimuth angle" <<std::endl;
+			throw std::runtime_error("");
+		}
+		if(this->config.zenithMinimum<0.0){
+			std::cout<<": minimum zenith angle must be greater than or equal to zero" << std::endl;
+			throw std::runtime_error("");
+		}
+		if(this->config.zenithMaximum>Constants::pi){
+			std::cout<< ": maximum zenith angle must be less than or equal to pi" <<std::endl;
+			throw std::runtime_error("");
+		}
+		if(this->config.zenithMinimum>this->config.zenithMaximum){
+			std::cout<<": minimum zenith angle must be less than or equal to maximum zenith angle"<<std::endl;
+			throw std::runtime_error("");
+		}
 		try{
 			Particle::ParticleType initialType=deduceInitialType(this->config.finalType1,this->config.finalType2);
 		}catch(std::runtime_error& re){
-			throw("Something bad happened while deducing the Initial particle type");
+			std::cout<<"Something bad happened while deducing the Initial particle type" << std::endl;
+			throw std::runtime_error("");
 		}
 		this->initialType = initialType;
 		// write the pointer to the RNG
-		if(!random)
-			throw("A random service is required");
-		if(basic.crossSectionPath.empty())
-			throw(": DoublyDifferentialCrossSectionFile must be specified");
-		else if(basic.totalCrossSectionPath.empty())
-			throw(": TotalCrossSectionFile must be specified");
-		else
+		if(!random){
+			std::cout<<"A random service is required"<<std::endl;
+			throw std::runtime_error("");
+		}
+		if(basic.crossSectionPath.empty()){
+			std::cout<<": DoublyDifferentialCrossSectionFile must be specified"<<std::endl;
+			throw std::runtime_error("");
+		}
+		else if(basic.totalCrossSectionPath.empty()){
+			std::cout<<": TotalCrossSectionFile must be specified"<<std::endl;
+			throw std::runtime_error("");
+		}else{
 			crossSection.load(basic.crossSectionPath,basic.totalCrossSectionPath);
-		
+		}
 		this->crossSection.insert_blobs( this->config );
 	}
 
@@ -134,7 +160,8 @@ namespace LeptonInjector{
 				//squared kinetic energy of final state particle 1:
 				double kE1sq=E1*E1 - m1*m1;
 				if(kE1sq<=0){
-                    throw "Negative kinetic energy. Not good";
+					std::cout<< "Negative kinetic energy detected in `computeFinalStateAngles` " <<std::endl;
+					throw std::runtime_error("");
                 }
 				cos_theta1=(E1 - x*y*M_N - m1*m1/(2*E_total))/sqrt(kE1sq);
 				kE1=sqrt(kE1sq);
@@ -142,7 +169,10 @@ namespace LeptonInjector{
 			else{ //leptonic GR
 				double m_e = Constants::electronMass;
 				
-				if(E1<=0){ throw "Bjorken Y > 1?"; }
+				if(E1<=0){
+					std::cout << "Bjorken Y > 1?" << std::endl;
+					throw std::runtime_error("");
+				}
                 
 				
 				cos_theta1=1 - (m_e*m_e + 2*m_e*E_total - m1*m1)/(2*E_total*E1);
@@ -238,12 +268,18 @@ namespace LeptonInjector{
 		suspendOnCompletion = true;
 		random = random_;
 		earthModel = earth_;
-		if(config.injectionRadius<0)
-			throw(": InjectionRadius must be non-negative");
-		if(config.endcapLength<0)
-			throw(": EndcapLength must be non-negative");
-		if(!earthModel)
-			throw(": an Earth model service is required");
+		if(config.injectionRadius<0){
+			std::cout << ": InjectionRadius must be non-negative" <<std::endl;
+			throw std::runtime_error("");
+		}
+		if(config.endcapLength<0){
+			std::cout << ": EndcapLength must be non-negative" <<std::endl;
+			throw std::runtime_error("");
+		}
+		if(!earthModel){
+			std::cout<< ": an Earth model service is required" << std::endl;
+			throw std::runtime_error("");
+		}
 	}
 	
 
@@ -334,10 +370,14 @@ namespace LeptonInjector{
 		suspendOnCompletion = true;
 		random = random_;
 		config = config_;
-		if(config.cylinderRadius<0)
-			throw(": CylinderRadius must be non-negative");
-		if(config.cylinderHeight<0)
-			throw(": CylinderHeight must be non-negative");
+		if(config.cylinderRadius<0){
+			std::cout<< ": CylinderRadius must be non-negative" << std::endl;
+			throw std::runtime_error("");
+		}
+		if(config.cylinderHeight<0){
+			std::cout << ": CylinderHeight must be non-negative" << std::endl;
+			throw std::runtime_error("");
+		}
 	}
 	
 	
