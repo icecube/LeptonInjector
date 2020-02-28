@@ -12,7 +12,6 @@
 
 #include "tools.h"
 
-TEST_GROUP(RangedInjection);
 
 using namespace LeptonInjector;
 
@@ -159,7 +158,7 @@ TEST(2_reject_invalid_ranged_params){
 		FAIL("configuring with a negative endcap length should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 }
-
+/*
 TEST(3_number_of_events){
 	const unsigned int nEvents=100;
 	const std::string filename=I3Test::testfile("Ranged_NEvents_test.i3");
@@ -926,3 +925,4 @@ TEST(A_column_depth_distribution){
 						 columnDepthMoments, __FILE__, __LINE__);
 	}
 }
+*/

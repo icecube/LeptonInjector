@@ -121,6 +121,8 @@ LIST(APPEND TEST_SOURCES
     ${CMAKE_SOURCE_DIR}/private/test/test-controller.cxx
     ${CMAKE_SOURCE_DIR}/private/test/tools.cxx
     ${CMAKE_SOURCE_DIR}/private/test/Utils.cxx
+    ${CMAKE_SOURCE_DIR}/private/test/test-volumeinjection.cxx
+    ${CMAKE_SOURCE_DIR}/private/test/test-rangedinjection.cxx
 )
 
 ADD_EXECUTABLE(lepton-test
@@ -130,10 +132,13 @@ ADD_EXECUTABLE(lepton-test
 TARGET_LINK_LIBRARIES(lepton-test
     lepton_injector)
 
+TARGET_INCLUDE_DIRECTORIES(lepton-test PUBLIC
+    {CMAKE_SOURCE_DIR}/private/test
+)
+
 ADD_TEST(lepton-test lepton-test
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/private/test
 )
-
 LIST (APPEND ALL_TESTS
     lepton-test
 )

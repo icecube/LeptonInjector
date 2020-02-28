@@ -6,160 +6,150 @@
 #include <gsl/gsl_monte_vegas.h>
 
 #include <LeptonInjector.h>
-#include <BasicInjectionConfiguration.h"
+#include <BasicInjectionConfiguration.h>
 #include <Constants.h>
 #include <Particle.h>
 
 #include "tools.h"
 
-TEST_GROUP(VolumeInjection);
-
 using namespace LeptonInjector;
 
-//None of the default values in VolumeInjectionConfiguration should set off
+//None of the default values in BasicInjectionConfiguration should set off
 //errors in the module
 TEST(1_sane_defaults_in_volume_config){
-	VolumeInjectionConfiguration config;
-	VolumeLeptonInjector inj(config);
-	ConfigureStandardParams(inj); //
+	BasicInjectionConfiguration config;
+	VolumeLeptonInjector inj(config, randomService);
+	inj.Configure( *minimal_volume ); //
 }
 
 //attempting to set nonsensical parameter values should be rejected
 TEST(2_reject_invalid_volume_params){
 	try{
-		VolumeInjectionConfiguration config;
+		BasicInjectionConfiguration config;
 		config.events=0;
-		VolumeLeptonInjector inj(config);
-		ConfigureStandardParams(inj);
+		VolumeLeptonInjector inj(config, randomService);
+		inj.Configure( *minimal_volume );
 		FAIL("configuring with 0 events should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
 	try{
-		VolumeInjectionConfiguration config;
+		BasicInjectionConfiguration config;
 		config.energyMinimum=0;
-		VolumeLeptonInjector inj(config);
-		ConfigureStandardParams(inj);
+		VolumeLeptonInjector inj(config, randomService);
+		inj.Configure( *minimal_volume );
 		FAIL("configuring with a non-positive minimum energy should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
 	try{
-		VolumeInjectionConfiguration config;
+		BasicInjectionConfiguration config;
 		config.energyMaximum=0;
-		VolumeLeptonInjector inj(config);
-		ConfigureStandardParams(inj);
+		VolumeLeptonInjector inj(config, randomService);
+		inj.Configure( *minimal_volume );
 		FAIL("configuring with a non-positive maximum energy should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
 	try{
-		VolumeInjectionConfiguration config;
+		BasicInjectionConfiguration config;
 		config.energyMinimum=20;
 		config.energyMaximum=10;
-		VolumeLeptonInjector inj(config);
-		ConfigureStandardParams(inj);
+		VolumeLeptonInjector inj(config, randomService);
+		inj.Configure( *minimal_volume );
 		FAIL("configuring with a maximum energy below the minimum energy should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
 	try{
-		VolumeInjectionConfiguration config;
+		BasicInjectionConfiguration config;
 		config.azimuthMinimum=-2;
-		VolumeLeptonInjector inj(config);
-		ConfigureStandardParams(inj);
+		VolumeLeptonInjector inj(config, randomService);
+		inj.Configure( *minimal_volume );
 		FAIL("configuring with a negative minimum azimuth should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
 	try{
-		VolumeInjectionConfiguration config;
+		BasicInjectionConfiguration config;
 		config.azimuthMaximum=7;
-		VolumeLeptonInjector inj(config);
-		ConfigureStandardParams(inj);
+		VolumeLeptonInjector inj(config, randomService);
+		inj.Configure( *minimal_volume );
 		FAIL("configuring with a maximum azimuth greater than 2 pi should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
 	try{
-		VolumeInjectionConfiguration config;
+		BasicInjectionConfiguration config;
 		config.azimuthMinimum=2;
 		config.azimuthMaximum=1;
-		VolumeLeptonInjector inj(config);
-		ConfigureStandardParams(inj);
+		VolumeLeptonInjector inj(config, randomService);
+		inj.Configure( *minimal_volume );
 		FAIL("configuring with a maximum azimuth less than the minimum azimuth should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
 	try{
-		VolumeInjectionConfiguration config;
+		BasicInjectionConfiguration config;
 		config.zenithMinimum=-2;
-		VolumeLeptonInjector inj(config);
-		ConfigureStandardParams(inj);
+		VolumeLeptonInjector inj(config, randomService);
+		inj.Configure( *minimal_volume );
 		FAIL("configuring with a negative minimum zenith should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
 	try{
-		VolumeInjectionConfiguration config;
+		BasicInjectionConfiguration config;
 		config.zenithMaximum=4;
-		VolumeLeptonInjector inj(config);
-		ConfigureStandardParams(inj);
+		VolumeLeptonInjector inj(config, randomService);
+		inj.Configure( *minimal_volume );
 		FAIL("configuring with a maximum zenith greater than pi should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
 	try{
-		VolumeInjectionConfiguration config;
+		BasicInjectionConfiguration config;
 		config.zenithMinimum=2;
 		config.zenithMaximum=1;
-		VolumeLeptonInjector inj( config);
-		ConfigureStandardParams(inj);
+		VolumeLeptonInjector inj(config, randomService);
+		inj.Configure( *minimal_volume );
 		FAIL("configuring with a maximum zenith less than the minimum zenith should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
 	try{
-		VolumeInjectionConfiguration config;
-		config.finalType1=LI_Particle::Neutron;
-		VolumeLeptonInjector inj( config);
-		ConfigureStandardParams(inj);
+		BasicInjectionConfiguration config;
+		config.finalType1=Particle::Neutron;
+		VolumeLeptonInjector inj(config, randomService);
+		inj.Configure( *minimal_volume );
 		FAIL("configuring with a non-supported particle type should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
 	try{
-		VolumeInjectionConfiguration config;
-		config.finalType2=LI_Particle::YAGLaser;
-		VolumeLeptonInjector inj( config);
-		ConfigureStandardParams(inj);
+		BasicInjectionConfiguration config;
+		config.finalType2=Particle::YAGLaser;
+		VolumeLeptonInjector inj(config, randomService);
+		inj.Configure( *minimal_volume );
 		FAIL("configuring with a non-supported particle type should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
 	try{
-		VolumeInjectionConfiguration config;
-		I3Context context;
-		//no random service
-		context.Put(earthmodelService,earthModelName);
-		VolumeLeptonInjector inj( config);
-		ConfigureStandardParams(inj);
-		FAIL("not finding the random service in the cntext should be detected");
-	}catch(std::runtime_error& e){/*squash*/}
-	
-	try{
-		VolumeInjectionConfiguration config;
-		VolumeLeptonInjector inj( config);
+		BasicInjectionConfiguration config;
+		VolumeLeptonInjector inj(config, randomService);
 		//don't set cross section file
-		inj.Configure();
+		minimal_volume->crossSectionPath = "";
+		inj.Configure( *minimal_volume );
 		FAIL("configuring without a cross section should be rejected");
-	}catch(std::runtime_error& e){/*squash*/}
+	}catch(std::runtime_error& e){minimal_volume->crossSectionPath = defaultCrosssectionPath; }
 	
 	try{
-		VolumeInjectionConfiguration config;
+		BasicInjectionConfiguration config;
 		config.cylinderRadius=-200;
-		VolumeLeptonInjector inj( config);
-		ConfigureStandardParams(inj);
+		VolumeLeptonInjector inj(config, randomService);
+		inj.Configure( *minimal_volume );
 		FAIL("configuring with a negative cylinder radius should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
 	try{
-		VolumeInjectionConfiguration config;
+		BasicInjectionConfiguration config;
 		config.cylinderHeight=-200;
-		VolumeLeptonInjector inj( config);
-		ConfigureStandardParams(inj);
+		VolumeLeptonInjector inj(config, randomService);
+		inj.Configure( *minimal_volume );
 		FAIL("configuring with a negative cylinder height should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 }
 
+/*
 TEST(3_number_of_events){
 	const unsigned int nEvents=100;
 	const std::string filename=I3Test::testfile("Volume_NEvents_test.i3");
@@ -211,25 +201,25 @@ TEST(3_number_of_events){
 }
 
 TEST(4_particle_type_production){
-	VolumeInjectionConfiguration config;
+	BasicInjectionConfiguration config;
 	config.events=2000;
 	{ //nu_mu CC
-		config.finalType1=LI_Particle::MuMinus;
-		config.finalType2=LI_Particle::Hadrons;
-		VolumeLeptonInjector inj( config);
+		config.finalType1=Particle::MuMinus;
+		config.finalType2=Particle::Hadrons;
+		VolumeLeptonInjector inj(config, randomService);
 		ConfigureEnergyRange(inj,1e2,1e6);
-		ConfigureStandardParams(inj);
+		inj.Configure( *minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
 			inj.DAQ(f);
 			const I3MCTree& tree=f->Get<const I3MCTree>();
 			ENSURE(!tree.empty(),"The MCTree should not be empty");
-			std::vector<LI_Particle> primaries=I3MCTreeUtils::GetPrimaries(tree);
+			std::vector<Particle> primaries=I3MCTreeUtils::GetPrimaries(tree);
 			ENSURE(primaries.size()==1,"There should be one primary");
-			LI_Particle primary=primaries.front();
-			ENSURE(primary.GetType()==LI_Particle::NuMu,"The primary should have type 'NuMu'");
-			std::vector<LI_Particle> products=I3MCTreeUtils::GetDaughters(tree,primary);
+			Particle primary=primaries.front();
+			ENSURE(primary.GetType()==Particle::NuMu,"The primary should have type 'NuMu'");
+			std::vector<Particle> products=I3MCTreeUtils::GetDaughters(tree,primary);
 			ENSURE(products.size()==2,"Two particles should be produced at the interaction vertex");
 			ENSURE((products[0].GetType()==config.finalType1 && products[1].GetType()==config.finalType2)
 				   || (products[1].GetType()==config.finalType1 && products[0].GetType()==config.finalType2));
@@ -237,22 +227,22 @@ TEST(4_particle_type_production){
 	}
 	
 	{ //nu_tau NC
-		config.finalType1=LI_Particle::NuTau;
-		config.finalType2=LI_Particle::Hadrons;
-		VolumeLeptonInjector inj( config);
+		config.finalType1=Particle::NuTau;
+		config.finalType2=Particle::Hadrons;
+		VolumeLeptonInjector inj(config, randomService);
 		ConfigureEnergyRange(inj,1e2,1e6);
-		ConfigureStandardParams(inj);
+		inj.Configure( *minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
 			inj.DAQ(f);
 			const I3MCTree& tree=f->Get<const I3MCTree>();
 			ENSURE(!tree.empty(),"The MCTree should not be empty");
-			std::vector<LI_Particle> primaries=I3MCTreeUtils::GetPrimaries(tree);
+			std::vector<Particle> primaries=I3MCTreeUtils::GetPrimaries(tree);
 			ENSURE(primaries.size()==1,"There should be one primary");
-			LI_Particle primary=primaries.front();
-			ENSURE(primary.GetType()==LI_Particle::NuTau,"The primary should have type 'NuTau'");
-			std::vector<LI_Particle> products=I3MCTreeUtils::GetDaughters(tree,primary);
+			Particle primary=primaries.front();
+			ENSURE(primary.GetType()==Particle::NuTau,"The primary should have type 'NuTau'");
+			std::vector<Particle> products=I3MCTreeUtils::GetDaughters(tree,primary);
 			ENSURE(products.size()==2,"Two particles should be produced at the interaction vertex");
 			ENSURE((products[0].GetType()==config.finalType1 && products[1].GetType()==config.finalType2)
 				   || (products[1].GetType()==config.finalType1 && products[0].GetType()==config.finalType2));
@@ -260,22 +250,22 @@ TEST(4_particle_type_production){
 	}
 	
 	{ //nu_e^bar GR
-		config.finalType1=LI_Particle::EPlus;
-		config.finalType2=LI_Particle::NuE;
-		VolumeLeptonInjector inj( config);
+		config.finalType1=Particle::EPlus;
+		config.finalType2=Particle::NuE;
+		VolumeLeptonInjector inj(config, randomService);
 		ConfigureEnergyRange(inj,1e2,1e6);
-		ConfigureStandardParams(inj);
+		inj.Configure( *minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
 			inj.DAQ(f);
 			const I3MCTree& tree=f->Get<const I3MCTree>();
 			ENSURE(!tree.empty(),"The MCTree should not be empty");
-			std::vector<LI_Particle> primaries=I3MCTreeUtils::GetPrimaries(tree);
+			std::vector<Particle> primaries=I3MCTreeUtils::GetPrimaries(tree);
 			ENSURE(primaries.size()==1,"There should be one primary");
-			LI_Particle primary=primaries.front();
-			ENSURE(primary.GetType()==LI_Particle::NuEBar,"The primary should have type 'NuEBar'");
-			std::vector<LI_Particle> products=I3MCTreeUtils::GetDaughters(tree,primary);
+			Particle primary=primaries.front();
+			ENSURE(primary.GetType()==Particle::NuEBar,"The primary should have type 'NuEBar'");
+			std::vector<Particle> products=I3MCTreeUtils::GetDaughters(tree,primary);
 			ENSURE(products.size()==2,"Two particles should be produced at the interaction vertex");
 			ENSURE((products[0].GetType()==config.finalType1 && products[1].GetType()==config.finalType2)
 				   || (products[1].GetType()==config.finalType1 && products[0].GetType()==config.finalType2));
@@ -285,7 +275,7 @@ TEST(4_particle_type_production){
 
 TEST(5_energy_distribution){
 	resetRandomState();
-	VolumeInjectionConfiguration config;
+	BasicInjectionConfiguration config;
 	config.events=50000;
 	{ //uniform distribution
 		config.energyMinimum=100* Constants::GeV;
@@ -295,8 +285,8 @@ TEST(5_energy_distribution){
 		MomentAccumulator moments;
 		double minEnSeen=1e10* Constants::GeV, maxEnSeen=0* Constants::GeV;
 		
-		VolumeLeptonInjector inj( config);
-		ConfigureStandardParams(inj);
+		VolumeLeptonInjector inj(config, randomService);
+		inj.Configure( *minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -327,8 +317,8 @@ TEST(5_energy_distribution){
 		MomentAccumulator moments;
 		double minEnSeen=1e10* Constants::GeV, maxEnSeen=0* Constants::GeV;
 		
-		VolumeLeptonInjector inj( config);
-		ConfigureStandardParams(inj);
+		VolumeLeptonInjector inj(config, randomService);
+		inj.Configure( *minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -359,8 +349,8 @@ TEST(5_energy_distribution){
 		MomentAccumulator moments;
 		double minEnSeen=1e10* Constants::GeV, maxEnSeen=0* Constants::GeV;
 		
-		VolumeLeptonInjector inj( config);
-		ConfigureStandardParams(inj);
+		VolumeLeptonInjector inj(config, randomService);
+		inj.Configure( *minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -391,8 +381,8 @@ TEST(5_energy_distribution){
 		MomentAccumulator moments;
 		double minEnSeen=1e10* Constants::GeV, maxEnSeen=0* Constants::GeV;
 		
-		VolumeLeptonInjector inj( config);
-		ConfigureStandardParams(inj);
+		VolumeLeptonInjector inj(config, randomService);
+		inj.Configure( *minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -417,15 +407,15 @@ TEST(5_energy_distribution){
 }
 
 TEST(6_zenith_distribution){
-	VolumeInjectionConfiguration config;
+	BasicInjectionConfiguration config;
 	config.events=10000;
 	{ //standard zenith range
 		MomentAccumulator moments;
 		double minCosZenSeen=2, maxCosZenSeen=-2;
 		
-		VolumeLeptonInjector inj( config);
+		VolumeLeptonInjector inj(config, randomService);
 		ConfigureEnergyRange(inj,1e2,1e6);
-		ConfigureStandardParams(inj);
+		inj.Configure( *minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -455,9 +445,9 @@ TEST(6_zenith_distribution){
 		config.zenithMaximum=1.8;
 		double minCosZenSeen=2, maxCosZenSeen=-2;
 		
-		VolumeLeptonInjector inj( config);
+		VolumeLeptonInjector inj(config, randomService);
 		ConfigureEnergyRange(inj,1e2,1e6);
-		ConfigureStandardParams(inj);
+		inj.Configure( *minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -483,15 +473,15 @@ TEST(6_zenith_distribution){
 }
 
 TEST(7_azimuth_distribution){
-	VolumeInjectionConfiguration config;
+	BasicInjectionConfiguration config;
 	config.events=10000;
 	{ //standard azimuth range
 		MomentAccumulator moments;
 		double minAziSeen=7, maxAziSeen=-1;
 		
-		VolumeLeptonInjector inj( config);
+		VolumeLeptonInjector inj(config, randomService);
 		ConfigureEnergyRange(inj,1e2,1e6);
-		ConfigureStandardParams(inj);
+		inj.Configure( *minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -520,9 +510,9 @@ TEST(7_azimuth_distribution){
 		config.azimuthMaximum=5;
 		double minAziSeen=7, maxAziSeen=-1;
 		
-		VolumeLeptonInjector inj( config);
+		VolumeLeptonInjector inj(config, randomService);
 		ConfigureEnergyRange(inj,1e2,1e6);
-		ConfigureStandardParams(inj);
+		inj.Configure( *minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -560,13 +550,13 @@ TEST(8_final_state_distribution){
 	std::fill_n(&counts[0][0],divisions*divisions,0);
 	
 	//generate samples and histogram them
-	VolumeInjectionConfiguration config;
+	BasicInjectionConfiguration config;
 	config.events=1000000;
 	config.energyMinimum=energy* Constants::GeV;
 	config.energyMaximum=energy* Constants::GeV;
 	resetRandomState();
-	VolumeLeptonInjector inj( config);
-	ConfigureStandardParams(inj);
+	VolumeLeptonInjector inj(config, randomService);
+	inj.Configure( *minimal_volume );
 	boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 	while(!inj.DoneGenerating()){
 		boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -603,7 +593,7 @@ TEST(8_final_state_distribution){
 			double x=pow(10.,k[0]);
 			double y=pow(10.,k[1]);
 			double jacobian=x*y*log(10.)*log(10.);
-			return(jacobian*params.xs.evaluateCrossSection(params.energy,x,y,LI_Particle::MuMinus));
+			return(jacobian*params.xs.evaluateCrossSection(params.energy,x,y,Particle::MuMinus));
 		};
 		double total=0;
 		//compute the intergal over each bin
@@ -677,15 +667,15 @@ TEST(8_final_state_distribution){
 }
 
 TEST(9_radial_distribution){
-	VolumeInjectionConfiguration config;
+	BasicInjectionConfiguration config;
 	config.events=25000;
 	{ //standard cylinder radius
 		MomentAccumulator moments;
 		double minRadSeen=1e6, maxRadSeen=-1;
 		
-		VolumeLeptonInjector inj( config);
+		VolumeLeptonInjector inj(config, randomService);
 		ConfigureEnergyRange(inj,1e2,1e6);
-		ConfigureStandardParams(inj);
+		inj.Configure( *minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -695,9 +685,9 @@ TEST(9_radial_distribution){
 			//check that the stored radial coordinate parameter is correct by comparing to the MCTree
 			const I3MCTree& tree=f->Get<const I3MCTree>();
 			ENSURE(!tree.empty(),"The MCTree should not be empty");
-			std::vector<LI_Particle> primaries=I3MCTreeUtils::GetPrimaries(tree);
+			std::vector<Particle> primaries=I3MCTreeUtils::GetPrimaries(tree);
 			ENSURE(primaries.size()==1,"There should be one primary");
-			LI_Particle primary=primaries.front();
+			Particle primary=primaries.front();
 			ENSURE_DISTANCE(props.radius, primary.GetPos().GetRho(), .001);
 			
 			moments.Insert(props.radius);
@@ -724,9 +714,9 @@ TEST(9_radial_distribution){
 		MomentAccumulator moments;
 		double minRadSeen=1e6, maxRadSeen=-1;
 		
-		VolumeLeptonInjector inj( config);
+		VolumeLeptonInjector inj(config, randomService);
 		ConfigureEnergyRange(inj,1e2,1e6);
-		ConfigureStandardParams(inj);
+		inj.Configure( *minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -736,9 +726,9 @@ TEST(9_radial_distribution){
 			//check that the stored radial coordinate parameter is correct by comparing to the MCTree
 			const I3MCTree& tree=f->Get<const I3MCTree>();
 			ENSURE(!tree.empty(),"The MCTree should not be empty");
-			std::vector<LI_Particle> primaries=I3MCTreeUtils::GetPrimaries(tree);
+			std::vector<Particle> primaries=I3MCTreeUtils::GetPrimaries(tree);
 			ENSURE(primaries.size()==1,"There should be one primary");
-			LI_Particle primary=primaries.front();
+			Particle primary=primaries.front();
 			ENSURE_DISTANCE(props.radius, primary.GetPos().GetRho(), .001);
 			
 			moments.Insert(props.radius);
@@ -762,15 +752,15 @@ TEST(9_radial_distribution){
 }
 
 TEST(A_vertical_distribution){
-	VolumeInjectionConfiguration config;
+	BasicInjectionConfiguration config;
 	config.events=10000;
 	{ //standard cylinder height
 		MomentAccumulator moments;
 		double minZSeen=1e6, maxZSeen=-1;
 		
-		VolumeLeptonInjector inj( config);
+		VolumeLeptonInjector inj(config, randomService);
 		ConfigureEnergyRange(inj,1e2,1e6);
-		ConfigureStandardParams(inj);
+		inj.Configure( *minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -780,9 +770,9 @@ TEST(A_vertical_distribution){
 			//check that the stored vertical coordinate parameter is correct by comparing to the MCTree
 			const I3MCTree& tree=f->Get<const I3MCTree>();
 			ENSURE(!tree.empty(),"The MCTree should not be empty");
-			std::vector<LI_Particle> primaries=I3MCTreeUtils::GetPrimaries(tree);
+			std::vector<Particle> primaries=I3MCTreeUtils::GetPrimaries(tree);
 			ENSURE(primaries.size()==1,"There should be one primary");
-			LI_Particle primary=primaries.front();
+			Particle primary=primaries.front();
 			ENSURE_DISTANCE(props.z, primary.GetPos().GetZ(), .001);
 			
 			moments.Insert(props.z);
@@ -809,9 +799,9 @@ TEST(A_vertical_distribution){
 		MomentAccumulator moments;
 		double minZSeen=1e6, maxZSeen=-1;
 		
-		VolumeLeptonInjector inj( config);
+		VolumeLeptonInjector inj(config, randomService);
 		ConfigureEnergyRange(inj,1e2,1e6);
-		ConfigureStandardParams(inj);
+		inj.Configure( *minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -821,9 +811,9 @@ TEST(A_vertical_distribution){
 			//check that the stored vertical coordinate parameter is correct by comparing to the MCTree
 			const I3MCTree& tree=f->Get<const I3MCTree>();
 			ENSURE(!tree.empty(),"The MCTree should not be empty");
-			std::vector<LI_Particle> primaries=I3MCTreeUtils::GetPrimaries(tree);
+			std::vector<Particle> primaries=I3MCTreeUtils::GetPrimaries(tree);
 			ENSURE(primaries.size()==1,"There should be one primary");
-			LI_Particle primary=primaries.front();
+			Particle primary=primaries.front();
 			ENSURE_DISTANCE(props.z, primary.GetPos().GetZ(), .001);
 			
 			moments.Insert(props.z);
@@ -845,3 +835,5 @@ TEST(A_vertical_distribution){
 						 moments, __FILE__, __LINE__);
 	}
 }
+
+*/
