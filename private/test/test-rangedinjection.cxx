@@ -19,7 +19,7 @@ using namespace LeptonInjector;
 //errors in the module
 TEST(1_sane_defaults_in_ranged_config){
 	BasicInjectionConfiguration config;
-	RangedLeptonInjector inj( config, earthmodelService, randomService);
+	RangedLeptonInjector inj( config, earth, random_machine);
 	inj.Configure( *minimal_ranged );
 }
 
@@ -28,7 +28,7 @@ TEST(2_reject_invalid_ranged_params){
 	try{
 		BasicInjectionConfiguration config;
 		config.events=0;
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		inj.Configure( *minimal_ranged );
 		FAIL("configuring with 0 events should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
@@ -36,7 +36,7 @@ TEST(2_reject_invalid_ranged_params){
 	try{
 		BasicInjectionConfiguration config;
 		config.energyMinimum=0;
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		inj.Configure( *minimal_ranged );
 		FAIL("configuring with a non-positive minimum energy should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
@@ -44,7 +44,7 @@ TEST(2_reject_invalid_ranged_params){
 	try{
 		BasicInjectionConfiguration config;
 		config.energyMaximum=0;
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		inj.Configure( *minimal_ranged );
 		FAIL("configuring with a non-positive maximum energy should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
@@ -53,7 +53,7 @@ TEST(2_reject_invalid_ranged_params){
 		BasicInjectionConfiguration config;
 		config.energyMinimum=20;
 		config.energyMaximum=10;
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		inj.Configure( *minimal_ranged );
 		FAIL("configuring with a maximum energy below the minimum energy should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
@@ -61,7 +61,7 @@ TEST(2_reject_invalid_ranged_params){
 	try{
 		BasicInjectionConfiguration config;
 		config.azimuthMinimum=-2;
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		inj.Configure( *minimal_ranged );
 		FAIL("configuring with a negative minimum azimuth should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
@@ -69,7 +69,7 @@ TEST(2_reject_invalid_ranged_params){
 	try{
 		BasicInjectionConfiguration config;
 		config.azimuthMaximum=7;
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		inj.Configure( *minimal_ranged );
 		FAIL("configuring with a maximum azimuth greater than 2 pi should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
@@ -78,7 +78,7 @@ TEST(2_reject_invalid_ranged_params){
 		BasicInjectionConfiguration config;
 		config.azimuthMinimum=2;
 		config.azimuthMaximum=1;
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		inj.Configure( *minimal_ranged );
 		FAIL("configuring with a maximum azimuth less than the minimum azimuth should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
@@ -86,7 +86,7 @@ TEST(2_reject_invalid_ranged_params){
 	try{
 		BasicInjectionConfiguration config;
 		config.zenithMinimum=-2;
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		inj.Configure( *minimal_ranged );
 		FAIL("configuring with a negative minimum zenith should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
@@ -94,7 +94,7 @@ TEST(2_reject_invalid_ranged_params){
 	try{
 		BasicInjectionConfiguration config;
 		config.zenithMaximum=4;
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		inj.Configure( *minimal_ranged );
 		FAIL("configuring with a maximum zenith greater than pi should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
@@ -103,7 +103,7 @@ TEST(2_reject_invalid_ranged_params){
 		BasicInjectionConfiguration config;
 		config.zenithMinimum=2;
 		config.zenithMaximum=1;
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		inj.Configure( *minimal_ranged );
 		FAIL("configuring with a maximum zenith less than the minimum zenith should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
@@ -111,7 +111,7 @@ TEST(2_reject_invalid_ranged_params){
 	try{
 		BasicInjectionConfiguration config;
 		config.finalType1=Particle::Neutron;
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		inj.Configure( *minimal_ranged );
 		FAIL("configuring with a non-supported particle type should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
@@ -119,7 +119,7 @@ TEST(2_reject_invalid_ranged_params){
 	try{
 		BasicInjectionConfiguration config;
 		config.finalType2=Particle::YAGLaser;
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		inj.Configure( *minimal_ranged );
 		FAIL("configuring with a non-supported particle type should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
@@ -127,7 +127,7 @@ TEST(2_reject_invalid_ranged_params){
 	
 	try{
 		BasicInjectionConfiguration config;
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		//don't set cross section file
 		minimal_ranged->crossSectionPath = "";
 		inj.Configure( *minimal_ranged );
@@ -136,7 +136,7 @@ TEST(2_reject_invalid_ranged_params){
 	
 	try{
 		BasicInjectionConfiguration config;
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		//don't set earth model service
 		minimal_ranged->totalCrossSectionPath = "";
 		inj.Configure( *minimal_ranged );		FAIL("configuring without an earth model service should be rejected");
@@ -145,7 +145,7 @@ TEST(2_reject_invalid_ranged_params){
 	try{
 		BasicInjectionConfiguration config;
 		config.injectionRadius=-200;
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		inj.Configure( *minimal_ranged );
 		FAIL("configuring with a negative injection radius should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
@@ -153,7 +153,7 @@ TEST(2_reject_invalid_ranged_params){
 	try{
 		BasicInjectionConfiguration config;
 		config.endcapLength=-200;
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		inj.Configure( *minimal_ranged );
 		FAIL("configuring with a negative endcap length should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
@@ -164,8 +164,8 @@ TEST(3_number_of_events){
 	const std::string filename=I3Test::testfile("Ranged_NEvents_test.i3");
 	
 	I3Tray tray;
-	tray.GetContext().Put(randomService);
-	tray.GetContext().Put(earthmodelService,earthModelName);
+	tray.GetContext().Put(random_machine);
+	tray.GetContext().Put(earth,earthModelName);
 	tray.AddModule("I3InfiniteSource")("Stream",I3Frame::Stream('Q'));
 	tray.AddModule("RangedLeptonInjector")
 	("NEvents",nEvents)
@@ -216,7 +216,7 @@ TEST(4_particle_type_production){
 	{ //nu_mu CC
 		config.finalType1=Particle::MuMinus;
 		config.finalType2=Particle::Hadrons;
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		ConfigureEnergyRange(inj,1e2,1e6);
 		inj.Configure( *minimal_ranged );
 		std::shared_ptr<OutputCollector> col=connectCollector(inj);
@@ -239,7 +239,7 @@ TEST(4_particle_type_production){
 	{ //nu_tau NC
 		config.finalType1=Particle::NuTau;
 		config.finalType2=Particle::Hadrons;
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		ConfigureEnergyRange(inj,1e2,1e6);
 		inj.Configure( *minimal_ranged );
 		std::shared_ptr<OutputCollector> col=connectCollector(inj);
@@ -262,7 +262,7 @@ TEST(4_particle_type_production){
 	{ //nu_e^bar GR
 		config.finalType1=Particle::EPlus;
 		config.finalType2=Particle::NuE;
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		ConfigureEnergyRange(inj,1e2,1e6);
 		inj.Configure( *minimal_ranged );
 		std::shared_ptr<OutputCollector> col=connectCollector(inj);
@@ -295,7 +295,7 @@ TEST(5_energy_distribution){
 		MomentAccumulator moments;
 		double minEnSeen=1e10* Constants::GeV, maxEnSeen=0* Constants::GeV;
 		
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		inj.Configure( *minimal_ranged );
 		std::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
@@ -327,7 +327,7 @@ TEST(5_energy_distribution){
 		MomentAccumulator moments;
 		double minEnSeen=1e10* Constants::GeV, maxEnSeen=0* Constants::GeV;
 		
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		inj.Configure( *minimal_ranged );
 		std::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
@@ -359,7 +359,7 @@ TEST(5_energy_distribution){
 		MomentAccumulator moments;
 		double minEnSeen=1e10* Constants::GeV, maxEnSeen=0* Constants::GeV;
 		
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		inj.Configure( *minimal_ranged );
 		std::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
@@ -391,7 +391,7 @@ TEST(5_energy_distribution){
 		MomentAccumulator moments;
 		double minEnSeen=1e10* Constants::GeV, maxEnSeen=0* Constants::GeV;
 		
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		inj.Configure( *minimal_ranged );
 		std::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
@@ -425,7 +425,7 @@ TEST(6_zenith_distribution){
 		
 		config.energyMinimum = 1e2;
 		config.energyMaximum = 1e6;
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		inj.Configure( *minimal_ranged );
 		while(!inj.DoneGenerating()){
 			std::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -455,7 +455,7 @@ TEST(6_zenith_distribution){
 		config.zenithMaximum=1.8;
 		double minCosZenSeen=2, maxCosZenSeen=-2;
 		
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		ConfigureEnergyRange(inj,1e2,1e6);
 		inj.Configure( *minimal_ranged );
 		std::shared_ptr<OutputCollector> col=connectCollector(inj);
@@ -489,7 +489,7 @@ TEST(7_azimuth_distribution){
 		MomentAccumulator moments;
 		double minAziSeen=7, maxAziSeen=-1;
 		
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		ConfigureEnergyRange(inj,1e2,1e6);
 		inj.Configure( *minimal_ranged );
 		std::shared_ptr<OutputCollector> col=connectCollector(inj);
@@ -520,7 +520,7 @@ TEST(7_azimuth_distribution){
 		config.azimuthMaximum=5;
 		double minAziSeen=7, maxAziSeen=-1;
 		
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		ConfigureEnergyRange(inj,1e2,1e6);
 		inj.Configure( *minimal_ranged );
 		std::shared_ptr<OutputCollector> col=connectCollector(inj);
@@ -565,7 +565,7 @@ TEST(8_final_state_distribution){
 	config.energyMinimum=energy* Constants::GeV;
 	config.energyMaximum=energy* Constants::GeV;
 	resetRandomState();
-	RangedLeptonInjector inj( config, earthmodelService, randomService);
+	RangedLeptonInjector inj( config, earth, random_machine);
 	inj.Configure( *minimal_ranged );
 	std::shared_ptr<OutputCollector> col=connectCollector(inj);
 	while(!inj.DoneGenerating()){
@@ -683,7 +683,7 @@ TEST(9_impact_parameter_distribution){
 		MomentAccumulator moments;
 		double minImpactSeen=1e6, maxImpactSeen=-1;
 		
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		ConfigureEnergyRange(inj,1e2,1e6);
 		inj.Configure( *minimal_ranged );
 		std::shared_ptr<OutputCollector> col=connectCollector(inj);
@@ -727,7 +727,7 @@ TEST(9_impact_parameter_distribution){
 		MomentAccumulator moments;
 		double minImpactSeen=1e6, maxImpactSeen=-1;
 		
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		ConfigureEnergyRange(inj,1e2,1e6);
 		inj.Configure( *minimal_ranged );
 		std::shared_ptr<OutputCollector> col=connectCollector(inj);
@@ -769,8 +769,8 @@ TEST(9_impact_parameter_distribution){
 
 TEST(A_column_depth_distribution){
 	using namespace earthmodel::EarthModelCalculator;
-	extern std::shared_ptr<earthmodel::EarthModelService> earthmodelService;
-	ENSURE((bool)earthmodelService);
+	extern std::shared_ptr<earthmodel::earth> earth;
+	ENSURE((bool)earth);
 	const double pi=4*atan(1.);
 	
 	BasicInjectionConfiguration config;
@@ -793,7 +793,7 @@ TEST(A_column_depth_distribution){
 		
 		MomentAccumulator positionMoments, columnDepthMoments;
 		
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		inj.Configure( *minimal_ranged );
 		std::shared_ptr<OutputCollector> col=connectCollector(inj);
 		
@@ -801,8 +801,8 @@ TEST(A_column_depth_distribution){
 		LI_Direction dir(config.zenithMinimum,config.azimuthMinimum);
 		ENSURE_EQUAL(config.energyMinimum,config.energyMaximum,"This test must be mono-energetic");
 		double totalColumnDepth=MWEtoColumnDepthCGS(GetLeptonRange(config.energyMinimum))
-		+earthmodelService->GetColumnDepthInCGS(center-config.endcapLength*dir,center+config.endcapLength*dir);
-		double expectedMaxDist=earthmodelService->DistanceForColumnDepthToPoint(center+config.endcapLength*dir,dir,totalColumnDepth)-config.endcapLength;
+		+earth->GetColumnDepthInCGS(center-config.endcapLength*dir,center+config.endcapLength*dir);
+		double expectedMaxDist=earth->DistanceForColumnDepthToPoint(center+config.endcapLength*dir,dir,totalColumnDepth)-config.endcapLength;
 		std::cout << "Expected maximum distance: " << expectedMaxDist << std::endl;
 		
 		while(!inj.DoneGenerating()){
@@ -817,7 +817,7 @@ TEST(A_column_depth_distribution){
 			
 			ENSURE_EQUAL(props.totalColumnDepth,totalColumnDepth);
 			positionMoments.Insert(primary.GetPos().GetX());
-			columnDepthMoments.Insert(earthmodelService->GetColumnDepthInCGS(primary.GetPos(),center+config.endcapLength*dir));
+			columnDepthMoments.Insert(earth->GetColumnDepthInCGS(primary.GetPos(),center+config.endcapLength*dir));
 		}
 		
 		testPowerLawness(0, -config.endcapLength, expectedMaxDist, config.events,
@@ -837,7 +837,7 @@ TEST(A_column_depth_distribution){
 		
 		MomentAccumulator positionMoments, columnDepthMoments;
 		
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		inj.Configure( *minimal_ranged );
 		std::shared_ptr<OutputCollector> col=connectCollector(inj);
 		
@@ -845,9 +845,9 @@ TEST(A_column_depth_distribution){
 		LI_Direction dir(config.zenithMinimum,config.azimuthMinimum);
 		ENSURE_EQUAL(config.energyMinimum,config.energyMaximum,"This test must be mono-energetic");
 		double totalColumnDepth=MWEtoColumnDepthCGS(GetLeptonRange(config.energyMinimum))
-		+earthmodelService->GetColumnDepthInCGS(center-config.endcapLength*dir,center+config.endcapLength*dir);
+		+earth->GetColumnDepthInCGS(center-config.endcapLength*dir,center+config.endcapLength*dir);
 		std::cout << "Total column depth: " << totalColumnDepth << std::endl;
-		double expectedMaxDist=earthmodelService->DistanceForColumnDepthToPoint(center+config.endcapLength*dir,dir,totalColumnDepth)-config.endcapLength;
+		double expectedMaxDist=earth->DistanceForColumnDepthToPoint(center+config.endcapLength*dir,dir,totalColumnDepth)-config.endcapLength;
 		std::cout << "Expected maximum distance: " << expectedMaxDist << std::endl;
 		
 		while(!inj.DoneGenerating()){
@@ -862,7 +862,7 @@ TEST(A_column_depth_distribution){
 			
 			ENSURE_EQUAL(props.totalColumnDepth,totalColumnDepth);
 			positionMoments.Insert(primary.GetPos().GetZ());
-			columnDepthMoments.Insert(earthmodelService->GetColumnDepthInCGS(primary.GetPos(),center+config.endcapLength*dir));
+			columnDepthMoments.Insert(earth->GetColumnDepthInCGS(primary.GetPos(),center+config.endcapLength*dir));
 		}
 		
 		//This would be the test of uniformity of postions, except that the positions
@@ -886,7 +886,7 @@ TEST(A_column_depth_distribution){
 		
 		MomentAccumulator positionMoments, columnDepthMoments;
 		
-		RangedLeptonInjector inj( config, earthmodelService, randomService);
+		RangedLeptonInjector inj( config, earth, random_machine);
 		inj.Configure( *minimal_ranged );
 		std::shared_ptr<OutputCollector> col=connectCollector(inj);
 		
@@ -894,11 +894,11 @@ TEST(A_column_depth_distribution){
 		LI_Direction dir(config.zenithMinimum,config.azimuthMinimum);
 		ENSURE_EQUAL(config.energyMinimum,config.energyMaximum,"This test must be mono-energetic");
 		double totalColumnDepth=MWEtoColumnDepthCGS(GetLeptonRange(config.energyMinimum))
-		+earthmodelService->GetColumnDepthInCGS(center-config.endcapLength*dir,center+config.endcapLength*dir);
+		+earth->GetColumnDepthInCGS(center-config.endcapLength*dir,center+config.endcapLength*dir);
 		std::cout << "Total column depth: " << totalColumnDepth << std::endl;
-		double expectedMaxDist=earthmodelService->DistanceForColumnDepthToPoint(center+config.endcapLength*dir,dir,totalColumnDepth)-config.endcapLength;
+		double expectedMaxDist=earth->DistanceForColumnDepthToPoint(center+config.endcapLength*dir,dir,totalColumnDepth)-config.endcapLength;
 		std::cout << "Expected maximum distance: " << expectedMaxDist << std::endl;
-		double actualColumnDepth=earthmodelService->GetColumnDepthInCGS(center+config.endcapLength*dir,center-expectedMaxDist*dir);
+		double actualColumnDepth=earth->GetColumnDepthInCGS(center+config.endcapLength*dir,center-expectedMaxDist*dir);
 		std::cout << "Actually availiable column depth: " << actualColumnDepth << std::endl;
 	
 		while(!inj.DoneGenerating()){
@@ -911,7 +911,7 @@ TEST(A_column_depth_distribution){
 			ENSURE(primaries.size()==1,"There should be one primary");
 			Particle primary=primaries.front();
 			
-			double columnDepth=earthmodelService->GetColumnDepthInCGS(primary.GetPos(),center+config.endcapLength*dir);
+			double columnDepth=earth->GetColumnDepthInCGS(primary.GetPos(),center+config.endcapLength*dir);
 			ENSURE_EQUAL(props.totalColumnDepth,actualColumnDepth);
 			positionMoments.Insert(primary.GetPos().GetZ());
 			columnDepthMoments.Insert(columnDepth);

@@ -5,7 +5,6 @@
 
 
 bool initialized=false;
-// I3Context context;
 const std::string earthModelName="Earth";
 //TODO: should put test cross sections in test data and fetch from I3_TESTDATA
 const std::string defaultCrosssectionPath=std::string("../../resources/test_xs.fits");
@@ -19,8 +18,11 @@ std::shared_ptr<LeptonInjector::MinimalInjectionConfiguration> minimal_volume = 
 			defaultTotalCrosssectionPath, true);
 
 
-std::shared_ptr<LeptonInjector::LI_random> randomService;
-std::shared_ptr<earthmodel::EarthModelService> earthmodelService;
+std::shared_ptr<LeptonInjector::LI_random> random_machine = std::make_shared<LeptonInjector::LI_random>();
+std::shared_ptr<earthmodel::EarthModelService> earth = std::make_shared<earthmodel::EarthModelService>();
+
+//std::shared_ptr<LeptonInjector::LI_random> randomService; 
+//std::shared_ptr<earthmodel::EarthModelService> earthmodelService; 
 
 /*
 struct service_initializer{

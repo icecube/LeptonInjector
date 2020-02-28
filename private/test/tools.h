@@ -1,5 +1,5 @@
-#ifndef LI_TEST_TOOLS
-#define LI_TEST_TOOLS
+#ifndef TOOLS_HEADER_INCLUDED
+#define TOOLS_HEADER_INCLUDED
 
 #include <cmath>
 
@@ -97,14 +97,10 @@ extern const std::string earthModelName;
 extern const std::string defaultCrosssectionPath;
 extern const std::string defaultTotalCrosssectionPath;
 
-extern std::shared_ptr<LeptonInjector::LI_random> randomService;
-extern std::shared_ptr<earthmodel::EarthModelService> earthmodelService;
+extern std::shared_ptr<LeptonInjector::LI_random> random_machine;
+extern std::shared_ptr<earthmodel::EarthModelService> earth;
 extern std::shared_ptr<LeptonInjector::MinimalInjectionConfiguration> minimal_ranged;
 extern std::shared_ptr<LeptonInjector::MinimalInjectionConfiguration> minimal_volume;
-
-
-void resetRandomState();
-
 
 
 //Welford's on-line variance algorithm, extended to higher moments, following
