@@ -97,8 +97,12 @@ extern const std::string earthModelName;
 extern const std::string defaultCrosssectionPath;
 extern const std::string defaultTotalCrosssectionPath;
 
-extern std::shared_ptr<LeptonInjector::LI_random> random_machine;
-extern std::shared_ptr<earthmodel::EarthModelService> earth;
+std::shared_ptr<LeptonInjector::LI_random> random_machine = std::make_shared<LeptonInjector::LI_random>();
+std::shared_ptr<earthmodel::EarthModelService> earth = std::make_shared<earthmodel::EarthModelService>();
+
+//extern std::shared_ptr<LeptonInjector::LI_random> random_machine;
+//extern std::shared_ptr<earthmodel::EarthModelService> earth;
+
 extern std::shared_ptr<LeptonInjector::MinimalInjectionConfiguration> minimal_ranged;
 extern std::shared_ptr<LeptonInjector::MinimalInjectionConfiguration> minimal_volume;
 

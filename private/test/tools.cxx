@@ -18,8 +18,8 @@ std::shared_ptr<LeptonInjector::MinimalInjectionConfiguration> minimal_volume = 
 			defaultTotalCrosssectionPath, true);
 
 
-std::shared_ptr<LeptonInjector::LI_random> random_machine = std::make_shared<LeptonInjector::LI_random>();
-std::shared_ptr<earthmodel::EarthModelService> earth = std::make_shared<earthmodel::EarthModelService>();
+//std::shared_ptr<LeptonInjector::LI_random> random_machine = std::make_shared<LeptonInjector::LI_random>();
+//std::shared_ptr<earthmodel::EarthModelService> earth = std::make_shared<earthmodel::EarthModelService>();
 
 //std::shared_ptr<LeptonInjector::LI_random> randomService; 
 //std::shared_ptr<earthmodel::EarthModelService> earthmodelService; 
