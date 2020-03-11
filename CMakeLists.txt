@@ -118,9 +118,9 @@ ENDIF(PYTHON_FOUND)
 ENABLE_TESTING()
 LIST(APPEND TEST_SOURCES
     ${CMAKE_SOURCE_DIR}/private/test/main.cxx
-    ${CMAKE_SOURCE_DIR}/private/test/test-controller.cxx
     ${CMAKE_SOURCE_DIR}/private/test/tools.cxx
     ${CMAKE_SOURCE_DIR}/private/test/Utils.cxx
+    ${CMAKE_SOURCE_DIR}/private/test/test-controller.cxx
     ${CMAKE_SOURCE_DIR}/private/test/test-volumeinjection.cxx
     ${CMAKE_SOURCE_DIR}/private/test/test-rangedinjection.cxx
 )
@@ -133,7 +133,7 @@ TARGET_LINK_LIBRARIES(lepton-test
     lepton_injector)
 
 TARGET_INCLUDE_DIRECTORIES(lepton-test PUBLIC
-    {CMAKE_SOURCE_DIR}/private/test
+    {CMAKE_SOURCE_DIR}/private/test/inc
 )
 
 ADD_TEST(lepton-test lepton-test
