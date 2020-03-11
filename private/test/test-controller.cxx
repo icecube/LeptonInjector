@@ -5,7 +5,7 @@
 #include <Controller.h>
 #include <Particle.h>
 
-#include "tools.h"
+#include "inc/tools.h"
 
 namespace LeptonInjector{ 
 

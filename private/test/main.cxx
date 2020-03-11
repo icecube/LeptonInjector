@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <map>
 
-#include "tools.h"
+#include "inc/tools.h"
 
 // ---------------TEST FUNCTION BORROWED FROM PHOTOSPLINE-----------------------------------
 // https://github.com/IceCubeOpenSource/photospline

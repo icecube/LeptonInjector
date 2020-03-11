@@ -42,6 +42,20 @@ namespace LeptonInjector {
 	LI_Direction::LI_Direction( const LI_Position& vec){
 		this->azimuth = atan( vec.at(1)/ vec.at(0) );
 		this->zenith  = acos( vec.at(2)/ vec.Magnitude() );
+		
+		// the arctan function returns [-pi,pi], but we want to stay within [0,2pi]
+		if (this->azimuth < 0){
+			this->azimuth += 2*Constants::pi;
+		}
+		//the arctan function also does not accurately map on to the angles between [pi/2 , 3pi/2]
+		// so we check the vectors and fix them if needed 
+		if (vec.at(0)<0){
+			if (vec.at(1)<0){
+				this->azimuth += Constants::pi;
+			}else if(vec.at(1) >=0){
+				this->azimuth -= Constants::pi;
+			}
+		}
 	}
 
 	double LI_Direction::Angle( LI_Direction& rhs) const{

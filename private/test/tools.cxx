@@ -1,28 +1,26 @@
-#include "tools.h"
+#include "inc/tools.h"
 #include <memory> // shared_ptr
 #include <Random.h>
 #include <EarthModelService.h>
+#include <cstdlib>
 
 
 bool initialized=false;
 const std::string earthModelName="Earth";
 //TODO: should put test cross sections in test data and fetch from I3_TESTDATA
-const std::string defaultCrosssectionPath=std::string("../../resources/test_xs.fits");
-const std::string defaultTotalCrosssectionPath=std::string("../../resources/test_xs_total.fits");
+const std::string base = std::getenv("EARTH_PARAMS");
+const std::string defaultCrosssectionPath=base+std::string("/resources/test_xs.fits");
+const std::string defaultTotalCrosssectionPath=base+std::string("/resources/test_xs_total.fits");
 
-std::shared_ptr<LeptonInjector::MinimalInjectionConfiguration> minimal_ranged = std::make_shared<LeptonInjector::MinimalInjectionConfiguration>(1, \ 
+LeptonInjector::MinimalInjectionConfiguration minimal_ranged(1, \ 
 			LeptonInjector::Particle::EPlus, LeptonInjector::Particle::Hadrons, defaultCrosssectionPath, \
 			defaultTotalCrosssectionPath, true);
-std::shared_ptr<LeptonInjector::MinimalInjectionConfiguration> minimal_volume = std::make_shared<LeptonInjector::MinimalInjectionConfiguration>(1, \ 
+LeptonInjector::MinimalInjectionConfiguration minimal_volume(1, \ 
 			LeptonInjector::Particle::EPlus, LeptonInjector::Particle::Hadrons, defaultCrosssectionPath, \
 			defaultTotalCrosssectionPath, true);
 
-
-//std::shared_ptr<LeptonInjector::LI_random> random_machine = std::make_shared<LeptonInjector::LI_random>();
-//std::shared_ptr<earthmodel::EarthModelService> earth = std::make_shared<earthmodel::EarthModelService>();
-
-//std::shared_ptr<LeptonInjector::LI_random> randomService; 
-//std::shared_ptr<earthmodel::EarthModelService> earthmodelService; 
+std::shared_ptr<LeptonInjector::LI_random> random_machine; // = std::make_shared<LeptonInjector::LI_random>();
+std::shared_ptr<earthmodel::EarthModelService> earth; // = std::make_shared<earthmodel::EarthModelService>();
 
 /*
 struct service_initializer{

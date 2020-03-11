@@ -1,4 +1,3 @@
-#include "./tools.h"
 #include <fstream>
 
 #include <gsl/gsl_math.h>
@@ -10,7 +9,7 @@
 #include <Constants.h>
 #include <Particle.h>
 
-#include "tools.h"
+#include "inc/tools.h"
 
 using namespace LeptonInjector;
 
@@ -18,8 +17,8 @@ using namespace LeptonInjector;
 //errors in the module
 TEST(1_sane_defaults_in_volume_config){
 	BasicInjectionConfiguration config;
-	VolumeLeptonInjector inj(config, random_machine);
-	inj.Configure( *minimal_volume ); //
+	VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
+	inj.Configure( minimal_volume ); //
 }
 
 //attempting to set nonsensical parameter values should be rejected
@@ -27,24 +26,24 @@ TEST(2_reject_invalid_volume_params){
 	try{
 		BasicInjectionConfiguration config;
 		config.events=0;
-		VolumeLeptonInjector inj(config, random_machine);
-		inj.Configure( *minimal_volume );
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
+		inj.Configure( minimal_volume );
 		FAIL("configuring with 0 events should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
 	try{
 		BasicInjectionConfiguration config;
 		config.energyMinimum=0;
-		VolumeLeptonInjector inj(config, random_machine);
-		inj.Configure( *minimal_volume );
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
+		inj.Configure( minimal_volume );
 		FAIL("configuring with a non-positive minimum energy should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
 	try{
 		BasicInjectionConfiguration config;
 		config.energyMaximum=0;
-		VolumeLeptonInjector inj(config, random_machine);
-		inj.Configure( *minimal_volume );
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
+		inj.Configure( minimal_volume );
 		FAIL("configuring with a non-positive maximum energy should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
@@ -52,24 +51,24 @@ TEST(2_reject_invalid_volume_params){
 		BasicInjectionConfiguration config;
 		config.energyMinimum=20;
 		config.energyMaximum=10;
-		VolumeLeptonInjector inj(config, random_machine);
-		inj.Configure( *minimal_volume );
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
+		inj.Configure( minimal_volume );
 		FAIL("configuring with a maximum energy below the minimum energy should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
 	try{
 		BasicInjectionConfiguration config;
 		config.azimuthMinimum=-2;
-		VolumeLeptonInjector inj(config, random_machine);
-		inj.Configure( *minimal_volume );
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
+		inj.Configure( minimal_volume );
 		FAIL("configuring with a negative minimum azimuth should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
 	try{
 		BasicInjectionConfiguration config;
 		config.azimuthMaximum=7;
-		VolumeLeptonInjector inj(config, random_machine);
-		inj.Configure( *minimal_volume );
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
+		inj.Configure( minimal_volume );
 		FAIL("configuring with a maximum azimuth greater than 2 pi should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
@@ -77,24 +76,24 @@ TEST(2_reject_invalid_volume_params){
 		BasicInjectionConfiguration config;
 		config.azimuthMinimum=2;
 		config.azimuthMaximum=1;
-		VolumeLeptonInjector inj(config, random_machine);
-		inj.Configure( *minimal_volume );
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
+		inj.Configure( minimal_volume );
 		FAIL("configuring with a maximum azimuth less than the minimum azimuth should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
 	try{
 		BasicInjectionConfiguration config;
 		config.zenithMinimum=-2;
-		VolumeLeptonInjector inj(config, random_machine);
-		inj.Configure( *minimal_volume );
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
+		inj.Configure( minimal_volume );
 		FAIL("configuring with a negative minimum zenith should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
 	try{
 		BasicInjectionConfiguration config;
 		config.zenithMaximum=4;
-		VolumeLeptonInjector inj(config, random_machine);
-		inj.Configure( *minimal_volume );
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
+		inj.Configure( minimal_volume );
 		FAIL("configuring with a maximum zenith greater than pi should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
@@ -102,54 +101,54 @@ TEST(2_reject_invalid_volume_params){
 		BasicInjectionConfiguration config;
 		config.zenithMinimum=2;
 		config.zenithMaximum=1;
-		VolumeLeptonInjector inj(config, random_machine);
-		inj.Configure( *minimal_volume );
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
+		inj.Configure( minimal_volume );
 		FAIL("configuring with a maximum zenith less than the minimum zenith should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
 	try{
 		BasicInjectionConfiguration config;
 		config.finalType1=Particle::Neutron;
-		VolumeLeptonInjector inj(config, random_machine);
-		inj.Configure( *minimal_volume );
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
+		inj.Configure( minimal_volume );
 		FAIL("configuring with a non-supported particle type should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
 	try{
 		BasicInjectionConfiguration config;
 		config.finalType2=Particle::YAGLaser;
-		VolumeLeptonInjector inj(config, random_machine);
-		inj.Configure( *minimal_volume );
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
+		inj.Configure( minimal_volume );
 		FAIL("configuring with a non-supported particle type should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
 	try{
 		BasicInjectionConfiguration config;
-		VolumeLeptonInjector inj(config, random_machine);
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
 		//don't set cross section file
-		minimal_volume->crossSectionPath = "";
-		inj.Configure( *minimal_volume );
+		minimal_volume.crossSectionPath = "";
+		inj.Configure( minimal_volume );
 		FAIL("configuring without a cross section should be rejected");
-	}catch(std::runtime_error& e){minimal_volume->crossSectionPath = defaultCrosssectionPath; }
+	}catch(std::runtime_error& e){minimal_volume.crossSectionPath = defaultCrosssectionPath; }
 	
 	try{
 		BasicInjectionConfiguration config;
 		config.cylinderRadius=-200;
-		VolumeLeptonInjector inj(config, random_machine);
-		inj.Configure( *minimal_volume );
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
+		inj.Configure( minimal_volume );
 		FAIL("configuring with a negative cylinder radius should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 	
 	try{
 		BasicInjectionConfiguration config;
 		config.cylinderHeight=-200;
-		VolumeLeptonInjector inj(config, random_machine);
-		inj.Configure( *minimal_volume );
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
+		inj.Configure( minimal_volume );
 		FAIL("configuring with a negative cylinder height should be rejected");
 	}catch(std::runtime_error& e){/*squash*/}
 }
 
-/*
+/* these need to be updated, but this may take considerable work
 TEST(3_number_of_events){
 	const unsigned int nEvents=100;
 	const std::string filename=I3Test::testfile("Volume_NEvents_test.i3");
@@ -206,9 +205,9 @@ TEST(4_particle_type_production){
 	{ //nu_mu CC
 		config.finalType1=Particle::MuMinus;
 		config.finalType2=Particle::Hadrons;
-		VolumeLeptonInjector inj(config, random_machine);
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
 		ConfigureEnergyRange(inj,1e2,1e6);
-		inj.Configure( *minimal_volume );
+		inj.Configure( minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -229,9 +228,9 @@ TEST(4_particle_type_production){
 	{ //nu_tau NC
 		config.finalType1=Particle::NuTau;
 		config.finalType2=Particle::Hadrons;
-		VolumeLeptonInjector inj(config, random_machine);
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
 		ConfigureEnergyRange(inj,1e2,1e6);
-		inj.Configure( *minimal_volume );
+		inj.Configure( minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -252,9 +251,9 @@ TEST(4_particle_type_production){
 	{ //nu_e^bar GR
 		config.finalType1=Particle::EPlus;
 		config.finalType2=Particle::NuE;
-		VolumeLeptonInjector inj(config, random_machine);
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
 		ConfigureEnergyRange(inj,1e2,1e6);
-		inj.Configure( *minimal_volume );
+		inj.Configure( minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -285,8 +284,8 @@ TEST(5_energy_distribution){
 		MomentAccumulator moments;
 		double minEnSeen=1e10* Constants::GeV, maxEnSeen=0* Constants::GeV;
 		
-		VolumeLeptonInjector inj(config, random_machine);
-		inj.Configure( *minimal_volume );
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
+		inj.Configure( minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -317,8 +316,8 @@ TEST(5_energy_distribution){
 		MomentAccumulator moments;
 		double minEnSeen=1e10* Constants::GeV, maxEnSeen=0* Constants::GeV;
 		
-		VolumeLeptonInjector inj(config, random_machine);
-		inj.Configure( *minimal_volume );
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
+		inj.Configure( minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -349,8 +348,8 @@ TEST(5_energy_distribution){
 		MomentAccumulator moments;
 		double minEnSeen=1e10* Constants::GeV, maxEnSeen=0* Constants::GeV;
 		
-		VolumeLeptonInjector inj(config, random_machine);
-		inj.Configure( *minimal_volume );
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
+		inj.Configure( minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -381,8 +380,8 @@ TEST(5_energy_distribution){
 		MomentAccumulator moments;
 		double minEnSeen=1e10* Constants::GeV, maxEnSeen=0* Constants::GeV;
 		
-		VolumeLeptonInjector inj(config, random_machine);
-		inj.Configure( *minimal_volume );
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
+		inj.Configure( minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -413,9 +412,9 @@ TEST(6_zenith_distribution){
 		MomentAccumulator moments;
 		double minCosZenSeen=2, maxCosZenSeen=-2;
 		
-		VolumeLeptonInjector inj(config, random_machine);
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
 		ConfigureEnergyRange(inj,1e2,1e6);
-		inj.Configure( *minimal_volume );
+		inj.Configure( minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -445,9 +444,9 @@ TEST(6_zenith_distribution){
 		config.zenithMaximum=1.8;
 		double minCosZenSeen=2, maxCosZenSeen=-2;
 		
-		VolumeLeptonInjector inj(config, random_machine);
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
 		ConfigureEnergyRange(inj,1e2,1e6);
-		inj.Configure( *minimal_volume );
+		inj.Configure( minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -479,9 +478,9 @@ TEST(7_azimuth_distribution){
 		MomentAccumulator moments;
 		double minAziSeen=7, maxAziSeen=-1;
 		
-		VolumeLeptonInjector inj(config, random_machine);
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
 		ConfigureEnergyRange(inj,1e2,1e6);
-		inj.Configure( *minimal_volume );
+		inj.Configure( minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -510,9 +509,9 @@ TEST(7_azimuth_distribution){
 		config.azimuthMaximum=5;
 		double minAziSeen=7, maxAziSeen=-1;
 		
-		VolumeLeptonInjector inj(config, random_machine);
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
 		ConfigureEnergyRange(inj,1e2,1e6);
-		inj.Configure( *minimal_volume );
+		inj.Configure( minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -555,8 +554,8 @@ TEST(8_final_state_distribution){
 	config.energyMinimum=energy* Constants::GeV;
 	config.energyMaximum=energy* Constants::GeV;
 	resetRandomState();
-	VolumeLeptonInjector inj(config, random_machine);
-	inj.Configure( *minimal_volume );
+	VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
+	inj.Configure( minimal_volume );
 	boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 	while(!inj.DoneGenerating()){
 		boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -673,9 +672,9 @@ TEST(9_radial_distribution){
 		MomentAccumulator moments;
 		double minRadSeen=1e6, maxRadSeen=-1;
 		
-		VolumeLeptonInjector inj(config, random_machine);
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
 		ConfigureEnergyRange(inj,1e2,1e6);
-		inj.Configure( *minimal_volume );
+		inj.Configure( minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -714,9 +713,9 @@ TEST(9_radial_distribution){
 		MomentAccumulator moments;
 		double minRadSeen=1e6, maxRadSeen=-1;
 		
-		VolumeLeptonInjector inj(config, random_machine);
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
 		ConfigureEnergyRange(inj,1e2,1e6);
-		inj.Configure( *minimal_volume );
+		inj.Configure( minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -758,9 +757,9 @@ TEST(A_vertical_distribution){
 		MomentAccumulator moments;
 		double minZSeen=1e6, maxZSeen=-1;
 		
-		VolumeLeptonInjector inj(config, random_machine);
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
 		ConfigureEnergyRange(inj,1e2,1e6);
-		inj.Configure( *minimal_volume );
+		inj.Configure( minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));
@@ -799,9 +798,9 @@ TEST(A_vertical_distribution){
 		MomentAccumulator moments;
 		double minZSeen=1e6, maxZSeen=-1;
 		
-		VolumeLeptonInjector inj(config, random_machine);
+		VolumeLeptonInjector inj( config, std::make_shared<LI_random>());
 		ConfigureEnergyRange(inj,1e2,1e6);
-		inj.Configure( *minimal_volume );
+		inj.Configure( minimal_volume );
 		boost::shared_ptr<OutputCollector> col=connectCollector(inj);
 		while(!inj.DoneGenerating()){
 			boost::shared_ptr<I3Frame> f(new I3Frame('Q'));

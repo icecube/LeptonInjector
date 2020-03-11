@@ -3,7 +3,7 @@
 #include <Particle.h>
 #include <Coordinates.h>
 #include <Constants.h>
-#include "tools.h"
+#include "inc/tools.h"
 
 
 namespace LeptonInjector{ 
@@ -111,7 +111,9 @@ TEST(rotate_relative){
 	using Constants::pi;
 	
 	const double tol=1e-8;
-	const LI_Direction base(2.718,1.414);
+	double magic_zenith= 2.718;
+	double magic_azimuth = 1.4141;
+	const LI_Direction base(magic_zenith,magic_azimuth);
 	
 	//a relative rotation should produce a direction which differs by the input
 	//zenith angle, regardless of the input azimuth angle
@@ -121,6 +123,7 @@ TEST(rotate_relative){
 			ENSURE_DISTANCE( base.Angle(new_angle) ,zen,tol);
 		}
 	}
+
 	
 	//two relative rotations with azimuth angles which differ by pi should have
 	//an angle between them which is twice the rotation zenith angle, unless it
@@ -133,6 +136,7 @@ TEST(rotate_relative){
 			ENSURE_DISTANCE(d1.Angle(d2),(zen<=pi/2 ? 2*zen : 2*(pi-zen)),tol);
 		}
 	}
+	
 }
 
 //Quis probabit ipsa experimenta?
