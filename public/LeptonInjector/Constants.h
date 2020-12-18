@@ -39,6 +39,7 @@ static const double isoscalarMass   = 0.5*( protonMass + neutronMass );
 static const double electronMass    = 0.000511;
 static const double muonMass        = 0.105658374;
 static const double tauMass         = 1.77686;
+static const double HNLMass         = 0.1;
 
 // confusing units
 // static const double second          = 1.523e15; // [eV^-1 sec^-1]

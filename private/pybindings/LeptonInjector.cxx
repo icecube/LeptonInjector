@@ -42,6 +42,8 @@ BOOST_PYTHON_MODULE(LeptonInjector){
         .value("NuMuBar",Particle::NuMuBar)
         .value("NuTau",Particle::NuTau)
         .value("NuTauBar",Particle::NuTauBar)
+        .value("HNL",Particle::HNL)
+        .value("HNLBar",Particle::HNLBar)
         .value("NuMu",Particle::NuMu)
         .value("Hadrons",Particle::Hadrons)
     ;

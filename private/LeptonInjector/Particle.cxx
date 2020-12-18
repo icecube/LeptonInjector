@@ -56,6 +56,8 @@ namespace LeptonInjector{
 			case -14: return("NuMuBar"); break;
 			case 16: return("NuTau"); break;
 			case -16: return("NuTauBar"); break;
+			case 19: return("HNL"); break;
+			case -19: return("HNLBar"); break;
 			case -2000001006: return("Hadrons"); break;
 			default: return("Unsupported"); break;
 		}
@@ -92,6 +94,12 @@ namespace LeptonInjector{
             case ParticleType::TauMinus:
                 return( Constants::tauMass );
                 break;
+            case ParticleType::HNL:
+                return( Constants::HNLMass );
+                break;
+            case ParticleType::HNLBar:
+                return( Constants::HNLMass );
+                break;
 			case ParticleType::PPlus:
 				return( Constants::protonMass );
 				break;
@@ -111,6 +119,7 @@ namespace LeptonInjector{
 		return(p==Particle::ParticleType::EMinus   || p==Particle::ParticleType::EPlus ||
 			   p==Particle::ParticleType::MuMinus  || p==Particle::ParticleType::MuPlus ||
 			   p==Particle::ParticleType::TauMinus || p==Particle::ParticleType::TauPlus ||
+			   p==Particle::ParticleType::HNL      || p==Particle::ParticleType::HNLBar ||
 			   p==Particle::ParticleType::NuE      || p==Particle::ParticleType::NuEBar ||
 			   p==Particle::ParticleType::NuMu     || p==Particle::ParticleType::NuMuBar ||
 			   p==Particle::ParticleType::NuTau    || p==Particle::ParticleType::NuTauBar);
@@ -180,6 +189,7 @@ namespace LeptonInjector{
 			case Particle::ParticleType::NuE:      case Particle::ParticleType::NuEBar:
 			case Particle::ParticleType::NuMu:     case Particle::ParticleType::NuMuBar:
 			case Particle::ParticleType::NuTau:    case Particle::ParticleType::NuTauBar:
+			case Particle::ParticleType::HNL:      case Particle::ParticleType::HNLBar:
 				return(Particle::ParticleShape::MCTrack);
 			case Particle::ParticleType::EMinus: case Particle::ParticleType::EPlus:
 			case Particle::ParticleType::Hadrons:
@@ -207,7 +217,8 @@ namespace LeptonInjector{
 		}else if( (final_2==Particle::ParticleType::Hadrons) and (
 			final_1==Particle::Particle::NuEBar || final_1==Particle::Particle::NuE ||
 			final_1==Particle::Particle::NuMuBar || final_1==Particle::Particle::NuMu ||
-			final_1==Particle::Particle::NuTauBar || final_1==Particle::Particle::NuTau )){
+			final_1==Particle::Particle::NuTauBar || final_1==Particle::Particle::NuTau ||
+			final_1==Particle::Particle::HNLBar || final_1==Particle::Particle::HNL )){
 			return( 1 ); // neutral current
 		}
 		
@@ -217,6 +228,8 @@ namespace LeptonInjector{
     // This function returns the primary particle type given the final state particles
     // returns a particle type object    
 	Particle::ParticleType deduceInitialType(Particle::ParticleType pType1, Particle::ParticleType pType2){
+		if(pType1==Particle::Particle::HNL) return Particle::Particle::NuTau;
+        else if(pType1==Particle::Particle::HNLBar) return Particle::Particle::NuTauBar;
 		//only accept certain particle types in general
 		if(!isLepton(pType1) && pType1!=Particle::ParticleType::Hadrons)
             throw std::runtime_error("BadParticle"); 

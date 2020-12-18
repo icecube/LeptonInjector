@@ -75,6 +75,8 @@ namespace LeptonInjector{
                 TauMinus = 15,
                 NuTau = 16,
                 NuTauBar = -16,
+				HNL = 19,
+				HNLBar = -19,
                 
                 /* Nuclei */
                 H2Nucleus = 1000010020,
@@ -243,6 +245,7 @@ namespace LeptonInjector{
     (XiPlusBar)(OmegaPlusBar)(DPlus)(DMinus)(D0)(D0Bar)(DsPlus)(DsMinusBar)       \
     (LambdacPlus)(WPlus)(WMinus)(Z0)(NuE)(NuEBar)                                 \
     (NuMu)(NuMuBar)(TauPlus)(TauMinus)(NuTau)(NuTauBar)(H2Nucleus)                \
+	(HNL)(HNLBar)                                                                 \
     (He3Nucleus)(He4Nucleus)(Li6Nucleus)(Li7Nucleus)(Be9Nucleus)(B10Nucleus)      \
     (B11Nucleus)(C12Nucleus)(C13Nucleus)(N14Nucleus)(N15Nucleus)(O16Nucleus)      \
     (O17Nucleus)(O18Nucleus)(F19Nucleus)(Ne20Nucleus)(Ne21Nucleus)(Ne22Nucleus)   \
