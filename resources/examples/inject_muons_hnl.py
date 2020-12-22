@@ -17,8 +17,8 @@ import os
 # this looks in the parent folder to this file's containing folder 
 xs_folder = os.path.join( os.path.dirname(__file__), '..' )
 
-n_events        = 10000
-is_ranged       = True
+n_events       = 5000
+is_ranged      = False
 
 # hnl events
 diff_xs_hnl     = xs_folder + "/dsdxdy-hnl-N-nc-HERAPDF15NLO_EIG_central.fits"
@@ -44,9 +44,13 @@ minZenith   = 80.*deg
 maxZenith   = 180.*deg
 minAzimuth  = 0.*deg
 maxAzimuth  = 360.*deg
+injectionRadius = 1200
+endcapLength = 1200
+cylinderRadius = 700
+cylinderHeight = 1500
 
 # construct the controller 
-controller  = LI.Controller(injector_hnl, minE, maxE, gamma, minAzimuth, maxAzimuth, minZenith, maxZenith)  
+controller  = LI.Controller(injector_hnl, minE, maxE, gamma, minAzimuth, maxAzimuth, minZenith, maxZenith, injectionRadius, endcapLength, cylinderRadius, cylinderHeight)  
 controller.AddInjector(injector_hnlbar)
 
 # specify the output

@@ -219,7 +219,11 @@ namespace LeptonInjector{
 		double lifetime_max = (1000.*Constants::m)/(gamma*speed);
 		double lifetime_rest = random->Uniform(lifetime_min,lifetime_max);
 		double lifetime_boosted = gamma*lifetime_rest;
-		LI_Position vertex_daughters = vertex + dir*speed*lifetime_boosted;
+		LI_Position vertex_daughters = vertex + rotateRelative(dir,relativeZeniths.first,azimuth1)*speed*lifetime_boosted;
+		//std::cout << vertex.GetX() << " " << vertex.GetY() << " " << vertex.GetZ() << std::endl;
+		//std::cout << (rotateRelative(dir,relativeZeniths.first,azimuth1)).GetX() << " " << (rotateRelative(dir,relativeZeniths.first,azimuth1)).GetY() << " " << (rotateRelative(dir,relativeZeniths.first,azimuth1)).GetZ() << std::endl;
+		//std::cout << speed << " " << lifetime_boosted << std::endl;
+		//std::cout << vertex_daughters.GetX() << " " << vertex_daughters.GetY() << " " << vertex_daughters.GetZ() << std::endl;
 		// Define the decay channel
 		double rand_channel = random->Uniform(0,1);
 		// Random numbers for daughters
@@ -244,7 +248,7 @@ namespace LeptonInjector{
 					kineticEnergy(mHNL,(1-fs.y)*energy)
 		);
 		// Make the decay products of the HNL
-		(particle_tree)[1] = h5Particle( false, 
+		(particle_tree)[2] = h5Particle( false, 
 					static_cast<int32_t>(Particle::Particle::Hadrons),
 					vertex_daughters,
 					rotateRelative(dir,relativeZeniths.first,azimuth1),

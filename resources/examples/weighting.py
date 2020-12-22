@@ -56,7 +56,8 @@ def get_weight( props ):
 	LWevent.final_state_particle_1 = LW.ParticleType( props[6] )
 	LWevent.primary_type = LW.ParticleType( props[7] )
 	LWevent.radius = props[8]
-	LWevent.total_column_depth = props[9]
+	# Ranged = props[9], Volume = props[10]
+	LWevent.total_column_depth = props[10]
 	LWevent.x = 0
 	LWevent.y = 0
 	LWevent.z = 0
