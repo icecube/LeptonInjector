@@ -85,6 +85,8 @@ LIST (APPEND core_SOURCES
     ${CMAKE_SOURCE_DIR}/private/LeptonInjector/EventProps.cxx
     ${CMAKE_SOURCE_DIR}/private/LeptonInjector/Particle.cxx
     ${CMAKE_SOURCE_DIR}/private/LeptonInjector/Random.cxx
+	${CMAKE_SOURCE_DIR}/private/LeptonInjector/DecayWidths.cxx
+	${CMAKE_SOURCE_DIR}/private/LeptonInjector/HNLDecayEnergy.cxx
     ${CMAKE_SOURCE_DIR}/private/earthmodel-service/EarthModelCalculator.cxx
     ${CMAKE_SOURCE_DIR}/private/earthmodel-service/EarthModelService.cxx
     ${CMAKE_SOURCE_DIR}/private/phys-services/LICrossSection.cxx

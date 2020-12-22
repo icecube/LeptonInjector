@@ -230,6 +230,7 @@ namespace LeptonInjector{
     std::string particleName( Particle::ParticleType p);
     double particleMass( Particle::ParticleType type);
     double kineticEnergy( Particle::ParticleType type, double totalEnergy);
+    double kineticEnergy( double mass, double totalEnergy);
     double particleSpeed( Particle::ParticleType type, double kineticEnergy);
     Particle::ParticleShape decideShape(Particle::ParticleType t);
     Particle::ParticleType deduceInitialType( Particle::ParticleType pType1, Particle::ParticleType pType2);

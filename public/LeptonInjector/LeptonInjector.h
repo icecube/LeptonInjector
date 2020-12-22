@@ -109,7 +109,7 @@ namespace LeptonInjector{
 		///\param dir the direction of the interacting neutrino
 		///\param energy the energy of the interacting neutrino
 		///\param properties the associated structure where the event properties should be recorded
-		void FillTree(LI_Position vertex, LI_Direction dir, double energy, BasicEventProperties& properties, std::array<h5Particle,3>& particle_tree);
+		void FillTree(LI_Position vertex, LI_Direction dir, double energy, BasicEventProperties& properties, std::array<h5Particle,4>& particle_tree);
 		
 		///Random number source
 		///Configuration structure in which to store parameters

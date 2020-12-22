@@ -35,7 +35,8 @@ namespace LeptonInjector{
             // close the active group and its sub-datasets
             // add a new group for the next injector 
             void AddInjector(std::string injector_name , bool ranged);
-            void WriteEvent( BasicEventProperties& props, h5Particle& part1, h5Particle& part2, h5Particle& part3 );
+            //void WriteEvent( BasicEventProperties& props, h5Particle& part1, h5Particle& part2, h5Particle& part3 );
+            void WriteEvent( BasicEventProperties& props, h5Particle& part1, h5Particle& part2, h5Particle& part3, h5Particle& part4 );
             void WriteConfig( BasicInjectionConfiguration& config, bool ranged );
 
         private:
@@ -51,6 +52,7 @@ namespace LeptonInjector{
             // [event][particle]
             hid_t initials;
             hid_t final_1;
+			hid_t decay_1;
             hid_t final_2;
 
             hid_t properties;

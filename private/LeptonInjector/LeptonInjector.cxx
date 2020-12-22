@@ -1,5 +1,6 @@
 #include <LeptonInjector/LeptonInjector.h>
 #include <LeptonInjector/EventProps.h>
+#include <LeptonInjector/HNLDecayEnergy.h>
 
 #include <cassert>
 #include <fstream>
@@ -196,7 +197,7 @@ namespace LeptonInjector{
 	// So the zenith and azimuth are only what their names would suggest in the coordinate system where 
 	//		/base/ is the \hat{z} axis 
 	
-	void LeptonInjectorBase::FillTree(LI_Position vertex, LI_Direction dir, double energy, BasicEventProperties& properties, std::array<h5Particle,3>& particle_tree){
+	void LeptonInjectorBase::FillTree(LI_Position vertex, LI_Direction dir, double energy, BasicEventProperties& properties, std::array<h5Particle,4>& particle_tree){
 		const LICrossSection::finalStateRecord& fs=crossSection.sampleFinalState(energy,config.finalType1,this->random);
 		
 		std::pair<double,double> relativeZeniths=computeFinalStateAngles(energy,fs.x,fs.y);
@@ -210,15 +211,47 @@ namespace LeptonInjector{
 					energy
 		);
 
-		//Make the first final state particle
+		// HNL parameters
+		double mHNL = random->Uniform(0.1,std::min((1-fs.y)*energy,3.))*Constants::GeV;
+		double gamma = ((1-fs.y)*energy)/mHNL;
+		double speed = sqrt(1-pow(1./gamma,2))*Constants::c;
+		double lifetime_min = (10.*Constants::m)/(gamma*speed);
+		double lifetime_max = (1000.*Constants::m)/(gamma*speed);
+		double lifetime_rest = random->Uniform(lifetime_min,lifetime_max);
+		double lifetime_boosted = gamma*lifetime_rest;
+		LI_Position vertex_daughters = vertex + dir*speed*lifetime_boosted;
+		// Define the decay channel
+		double rand_channel = random->Uniform(0,1);
+		// Random numbers for daughters
+		double rand_energy_1 = random->Uniform(0,1);
+		double rand_energy_2 = random->Uniform(-1,1);
+		double azimuth_p1p2 = random->Uniform(0,2*M_PI);
+		double azimuth_rotZ = random->Uniform(0,2*M_PI);
+		double alpha_rotX = random->Uniform(0,2*M_PI);
+		// Get the daughter(s) vector
+		bool isHNL = true;
+		if(config.finalType1==Particle::Particle::HNLBar) isHNL = false;
+		std::vector<double> daughters_vector = GetDaughterVector(isHNL,mHNL,(1-fs.y)*energy,M_PI-relativeZeniths.first,M_PI+azimuth1,rand_channel,rand_energy_1,rand_energy_2,azimuth_p1p2,azimuth_rotZ,alpha_rotX);
+		int n_daughters = daughters_vector.size()/4;
+		double energy_daughters = daughters_vector.at(2)-daughters_vector.at(1);
+		if(n_daughters==2) energy_daughters = (2./3.)*kineticEnergy(mHNL,(1-fs.y)*energy);
+
+		// Make the first final state particle (HNL)
 		(particle_tree)[1] = h5Particle( false, 
 					static_cast<int32_t>(config.finalType1),
 					vertex,
 					rotateRelative(dir,relativeZeniths.first,azimuth1),
-					kineticEnergy(config.finalType1,(1-fs.y)*energy)
+					kineticEnergy(mHNL,(1-fs.y)*energy)
 		);
-
-		(particle_tree)[2] = h5Particle(false,
+		// Make the decay products of the HNL
+		(particle_tree)[1] = h5Particle( false, 
+					static_cast<int32_t>(Particle::Particle::Hadrons),
+					vertex_daughters,
+					rotateRelative(dir,relativeZeniths.first,azimuth1),
+					energy_daughters
+		);
+		// Make the second final state particle (First cascade)
+		(particle_tree)[3] = h5Particle(false,
 					static_cast<int32_t>(config.finalType2),
 					vertex,
 					rotateRelative(dir,relativeZeniths.second,azimuth2),
@@ -314,7 +347,7 @@ namespace LeptonInjector{
 		//assemble the MCTree
 
 		RangedEventProperties properties;
-		std::array<h5Particle, 3> particle_tree;
+		std::array<h5Particle, 4> particle_tree;
 
 		properties.impactParameter=(pca-LI_Position(0,0,0)).Magnitude();
 		properties.totalColumnDepth=totalColumnDepth;
@@ -325,7 +358,7 @@ namespace LeptonInjector{
 
 		//update event count and check for completion
 		eventsGenerated++;
-		writer_link->WriteEvent( properties, particle_tree[0] , particle_tree[1], particle_tree[2]);
+		writer_link->WriteEvent( properties, particle_tree[0] , particle_tree[1], particle_tree[2], particle_tree[3]);
 
 		return(  (eventsGenerated < this->config.events)  );
 
@@ -373,7 +406,7 @@ namespace LeptonInjector{
 		
 		//assemble the MCTree
 		VolumeEventProperties properties;
-		std::array<h5Particle, 3> particle_tree;
+		std::array<h5Particle, 4> particle_tree;
 
 		bool use_electron_density = getInteraction(this->config.finalType1, this->config.finalType2 ) == 2;
 		
@@ -390,7 +423,7 @@ namespace LeptonInjector{
 		FillTree(vertex,dir,energy, properties, particle_tree);
 
 		//package up output and send it
-		writer_link->WriteEvent( properties, particle_tree[0] , particle_tree[1], particle_tree[2]);
+		writer_link->WriteEvent( properties, particle_tree[0] , particle_tree[1], particle_tree[2], particle_tree[3]);
 		//update event count and check for completion
 		eventsGenerated++;
 

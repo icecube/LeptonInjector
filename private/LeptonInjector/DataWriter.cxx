@@ -126,6 +126,7 @@ DataWriter::~DataWriter(){
         status = H5Gclose( group_handle ); 
         status = H5Dclose( initials );
         status = H5Dclose( final_1 );
+        status = H5Dclose( decay_1 );
         status = H5Dclose( final_2 );
         status = H5Dclose( properties );
 
@@ -198,6 +199,7 @@ void DataWriter::AddInjector( std::string injector_name , bool ranged){
     if(name_iterator>0){
         status = H5Dclose(initials);
         status = H5Dclose(final_1);
+        status = H5Dclose(decay_1);
         status = H5Dclose(final_2);
         status = H5Dclose(properties);
         status = H5Gclose( group_handle );
@@ -222,9 +224,11 @@ void DataWriter::AddInjector( std::string injector_name , bool ranged){
 
     const char* init_name = "initial";
     const char* final_1_name = "final_1";
+    const char* decay_1_name = "decay_1";
     const char* final_2_name = "final_2";
     initials  = H5Dcreate(group_handle,init_name, particleTable, file_space, H5P_DEFAULT, plist, H5P_DEFAULT );
     final_1 = H5Dcreate(group_handle,final_1_name, particleTable, file_space, H5P_DEFAULT, plist, H5P_DEFAULT); 
+    decay_1 = H5Dcreate(group_handle,decay_1_name, particleTable, file_space, H5P_DEFAULT, plist, H5P_DEFAULT); 
     final_2 = H5Dcreate(group_handle,final_2_name, particleTable, file_space, H5P_DEFAULT, plist, H5P_DEFAULT); 
     H5Sclose(file_space);
     H5Pclose(plist);
@@ -346,7 +350,60 @@ void DataWriter::writeVolumeConfig( BasicInjectionConfiguration& config ){
 }
 
 
-void DataWriter::WriteEvent( BasicEventProperties& props, h5Particle& part1, h5Particle& part2, h5Particle& part3 ){
+//void DataWriter::WriteEvent( BasicEventProperties& props, h5Particle& part1, h5Particle& part2, h5Particle& part3 ){
+//    // std::cout << " writing an event" << std::endl;
+//    hid_t memspace, file_space;
+//    const hsize_t n_dims = 1;
+//    hsize_t dims[n_dims] = {1};
+//    memspace = H5Screate_simple(n_dims, dims, NULL);
+//
+//    //Extend dataset
+//    dims[0] = event_count+1;
+//    H5Dset_extent(initials, dims);
+//    H5Dset_extent(final_1, dims);
+//    H5Dset_extent(final_2, dims);
+//    H5Dset_extent(properties, dims);
+//
+//    //Write waveforms
+//    file_space = H5Dget_space(initials);
+//    hsize_t start[n_dims] = {event_count};
+//    hsize_t count[n_dims] = {1};
+//    H5Sselect_hyperslab(file_space, H5S_SELECT_SET, start, NULL, count, NULL);
+//
+//
+//    // h5Particle temp_data[3] = {part1, part2, part3};
+//    H5Dwrite(initials, particleTable, memspace, file_space, H5P_DEFAULT, &part1);
+//    H5Sclose( file_space);
+//
+//    file_space = H5Dget_space( final_1 );
+//    H5Sselect_hyperslab( file_space, H5S_SELECT_SET, start, NULL, count, NULL);
+//    H5Dwrite(final_1, particleTable, memspace, file_space, H5P_DEFAULT, &part2);
+//    H5Sclose( file_space );
+//
+//    file_space = H5Dget_space( final_2 );
+//    H5Sselect_hyperslab( file_space, H5S_SELECT_SET, start, NULL, count, NULL);
+//    H5Dwrite(final_2, particleTable, memspace, file_space, H5P_DEFAULT, &part3);
+//    H5Sclose(file_space);
+//
+//    file_space = H5Dget_space( properties );
+//    H5Sselect_hyperslab( file_space, H5S_SELECT_SET, start, NULL, count, NULL);
+//    
+//    if (write_ranged){
+//        H5Dwrite(properties, rangedPropertiesTable, memspace, file_space, H5P_DEFAULT, &props);
+//    }else{
+//        H5Dwrite(properties, volumePropertiesTable, memspace, file_space, H5P_DEFAULT, &props);
+//    }
+//    
+//
+//    // delete(&temp_data);
+//
+//    // std::cout << "cleaning up" << std::endl;
+//    H5Sclose(file_space);
+//    H5Sclose(memspace);
+//    event_count++; 
+//}
+
+void DataWriter::WriteEvent( BasicEventProperties& props, h5Particle& part1, h5Particle& part2, h5Particle& part3, h5Particle& part4){
     // std::cout << " writing an event" << std::endl;
     hid_t memspace, file_space;
     const hsize_t n_dims = 1;
@@ -357,6 +414,7 @@ void DataWriter::WriteEvent( BasicEventProperties& props, h5Particle& part1, h5P
     dims[0] = event_count+1;
     H5Dset_extent(initials, dims);
     H5Dset_extent(final_1, dims);
+	H5Dset_extent(decay_1, dims);
     H5Dset_extent(final_2, dims);
     H5Dset_extent(properties, dims);
 
@@ -376,9 +434,14 @@ void DataWriter::WriteEvent( BasicEventProperties& props, h5Particle& part1, h5P
     H5Dwrite(final_1, particleTable, memspace, file_space, H5P_DEFAULT, &part2);
     H5Sclose( file_space );
 
+    file_space = H5Dget_space( decay_1 );
+    H5Sselect_hyperslab( file_space, H5S_SELECT_SET, start, NULL, count, NULL);
+    H5Dwrite(decay_1, particleTable, memspace, file_space, H5P_DEFAULT, &part3);
+    H5Sclose( file_space );
+
     file_space = H5Dget_space( final_2 );
     H5Sselect_hyperslab( file_space, H5S_SELECT_SET, start, NULL, count, NULL);
-    H5Dwrite(final_2, particleTable, memspace, file_space, H5P_DEFAULT, &part3);
+    H5Dwrite(final_2, particleTable, memspace, file_space, H5P_DEFAULT, &part4);
     H5Sclose(file_space);
 
     file_space = H5Dget_space( properties );
@@ -398,7 +461,6 @@ void DataWriter::WriteEvent( BasicEventProperties& props, h5Particle& part1, h5P
     H5Sclose(memspace);
     event_count++; 
 }
-
 void DataWriter::makeTables(){
     // Build the event properties table
     size_t dataSize = 0;

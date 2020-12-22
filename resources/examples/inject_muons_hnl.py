@@ -17,7 +17,7 @@ import os
 # this looks in the parent folder to this file's containing folder 
 xs_folder = os.path.join( os.path.dirname(__file__), '..' )
 
-n_events        = 5000
+n_events        = 10000
 is_ranged       = True
 
 # hnl events

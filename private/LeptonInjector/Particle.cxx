@@ -162,9 +162,16 @@ namespace LeptonInjector{
 		if(totalEnergy<mass){
 			return(0.);
 		}
-		return(sqrt(totalEnergy*totalEnergy-mass*mass));
+		return(totalEnergy-mass);
 	}
-	
+
+	double kineticEnergy(double mass, double totalEnergy){
+        if(totalEnergy<mass){
+            return(0.);
+        }
+        return(totalEnergy-mass);
+    }
+		
     // uses the particle type and kinetic energy to calculate the speed of the particle
     // relies on the constants! 
 	double particleSpeed(Particle::ParticleType type, double kineticEnergy){
