@@ -51,8 +51,10 @@ namespace LeptonInjector {
 		///Type of the neutrino which interacted to produce this event
 		int32_t initialType;
 
+		/// HNL mass
+		double mHNL;
 
-        void fill_BasicEventProperties(double totalEnergy, double zenith, double azimuth, double finalStateX, double finalStateY,  int32_t finalType1, int32_t finalType2, int32_t initialType );
+        void fill_BasicEventProperties(double totalEnergy, double zenith, double azimuth, double finalStateX, double finalStateY,  int32_t finalType1, int32_t finalType2, int32_t initialType, double mHNL );
 		
 	};
 	
@@ -83,7 +85,7 @@ namespace LeptonInjector {
 		
 	};
 
-    void fill_BasicEventProperties(double totalEnergy, double zenith, double azimuth, double finalStateX, double finalStateY,  int32_t finalType1, int32_t finalType2, int32_t initialType );
+    void fill_BasicEventProperties(double totalEnergy, double zenith, double azimuth, double finalStateX, double finalStateY,  int32_t finalType1, int32_t finalType2, int32_t initialType, double mHNL );
 
 
 }// end namespace LeptonInjector

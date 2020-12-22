@@ -472,6 +472,7 @@ void DataWriter::makeTables(){
     dataSize += 8; // int32_t - finalType1 // yeah, this should be 4 bytes. BUT hdf5 is /really/ dumb about data sizes 
     dataSize += 8; // int32_t - finalType2
     dataSize += 8; // int32_t - initialType
+    dataSize += 8; // double - mHNL
     dataSize += 8; // double - impactParam OR radius
     dataSize += 8; // double - totalColumnDepth or z
     
@@ -493,6 +494,7 @@ void DataWriter::makeTables(){
     status = H5Tinsert(basicPropertiesTable, "finalType1", HOFFSET(BasicEventProperties, finalType1) , real_long); 
     status = H5Tinsert(basicPropertiesTable, "finalType2", HOFFSET(BasicEventProperties, finalType2) , real_long);
     status = H5Tinsert(basicPropertiesTable, "initialType", HOFFSET(BasicEventProperties, initialType) , real_long); 
+    status = H5Tinsert(basicPropertiesTable, "mHNL", HOFFSET(BasicEventProperties, mHNL) , H5T_NATIVE_DOUBLE); 
 
     // we want tables for volume and ranged, so let's copy that basic one and make the (slightly) different ones below
     rangedPropertiesTable = H5Tcopy( basicPropertiesTable );

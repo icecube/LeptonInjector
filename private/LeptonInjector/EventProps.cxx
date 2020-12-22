@@ -27,7 +27,7 @@ namespace LeptonInjector {
     }
 
     // non-default constructors to add everything
-    void BasicEventProperties::fill_BasicEventProperties(double totalEnergy, double zenith, double azimuth, double finalStateX, double finalStateY,  int32_t finalType1, int32_t finalType2, int32_t initialType ){
+    void BasicEventProperties::fill_BasicEventProperties(double totalEnergy, double zenith, double azimuth, double finalStateX, double finalStateY,  int32_t finalType1, int32_t finalType2, int32_t initialType, double mHNL ){
         totalEnergy = totalEnergy;
     }
 

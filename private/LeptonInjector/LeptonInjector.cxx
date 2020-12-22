@@ -215,7 +215,7 @@ namespace LeptonInjector{
 		double mHNL = random->Uniform(0.1,std::min((1-fs.y)*energy,3.))*Constants::GeV;
 		double gamma = ((1-fs.y)*energy)/mHNL;
 		double speed = sqrt(1-pow(1./gamma,2))*Constants::c;
-		double lifetime_min = (10.*Constants::m)/(gamma*speed);
+		double lifetime_min = 0;//(10.*Constants::m)/(gamma*speed);
 		double lifetime_max = (1000.*Constants::m)/(gamma*speed);
 		double lifetime_rest = random->Uniform(lifetime_min,lifetime_max);
 		double lifetime_boosted = gamma*lifetime_rest;
@@ -270,6 +270,7 @@ namespace LeptonInjector{
 		properties.finalType1= static_cast<int32_t>(config.finalType1);
 		properties.finalType2= static_cast<int32_t>(config.finalType2);
 		properties.initialType=static_cast<int32_t>(deduceInitialType(config.finalType1, config.finalType2));
+		properties.mHNL=mHNL;
 	}
 	
 	//-----------------------
