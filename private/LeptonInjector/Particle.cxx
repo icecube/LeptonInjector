@@ -235,8 +235,8 @@ namespace LeptonInjector{
     // This function returns the primary particle type given the final state particles
     // returns a particle type object    
 	Particle::ParticleType deduceInitialType(Particle::ParticleType pType1, Particle::ParticleType pType2){
-		if(pType1==Particle::Particle::HNL) return Particle::Particle::NuTau;
-        else if(pType1==Particle::Particle::HNLBar) return Particle::Particle::NuTauBar;
+		if(pType1==Particle::ParticleType::HNL) return(Particle::ParticleType::NuTau);
+        else if(pType1==Particle::ParticleType::HNLBar) return(Particle::ParticleType::NuTauBar);
 		//only accept certain particle types in general
 		if(!isLepton(pType1) && pType1!=Particle::ParticleType::Hadrons)
             throw std::runtime_error("BadParticle"); 

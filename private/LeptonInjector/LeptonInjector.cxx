@@ -203,9 +203,9 @@ namespace LeptonInjector{
 		std::pair<double,double> relativeZeniths=computeFinalStateAngles(energy,fs.x,fs.y);
 		double azimuth1=this->random->Uniform(0,2*Constants::pi);
 		double azimuth2=azimuth1+(azimuth1<Constants::pi ? 1 : -1)*Constants::pi ;
-		
+
 		(particle_tree)[0]=  h5Particle(true,
-					static_cast<int32_t>(this->initialType),
+					static_cast<int32_t>(deduceInitialType(config.finalType1, config.finalType2)),
 					vertex,
 					dir,
 					energy
