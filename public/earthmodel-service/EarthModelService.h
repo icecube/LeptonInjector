@@ -57,9 +57,10 @@ class EarthModelService
                     ICE=5, 
                     AIR=6, 
                     VACUUM=7, 
+                    WATER=8,
                     LOWERMANTLE = 31,
                     UPPERMANTLE = 32,
-                    LLSVP = 33  // Large Low Shear Velosity Provinces
+                    LLSVP = 33  // Large Low Shear Velocity Provinces
                     };
 
    enum IceCapType {NOICE, ICESHEET, SIMPLEICECAP};
@@ -118,6 +119,18 @@ class EarthModelService
          double den = fParams_[n];
          while (n>0) den = den * x + fParams_[--n];
          return den;
+      }  
+
+      const double GetDensityGrad(double x) const
+      {
+         unsigned int n = fParams_.size() -1;
+         double den = fParams_[n];
+         double res = 0;
+         while (n>1) {
+             den = den * x + fParams_[--n];
+             res += den;
+         }
+         return res;
       }  
 
       /**
@@ -194,6 +207,32 @@ class EarthModelService
     */
    const EarthParam& GetEarthParam(const LeptonInjector::LI_Position& p_CE) const;
 
+
+   /**
+    * @brief Computes the material density in the given layer. 
+    * 
+    * This function is useful when multiple density queries are needed which 
+    * are known to all be within the same layer, since the layer can be cached 
+    * and reused for each query. It is the user's responsibility to ensure that 
+    * ep is actually the correct material layer for p_CE (most likey by ensuring 
+    * that it is the result of a call to `GetEarthParam(p_CE)`).
+    *
+    * @param ep the material layer in which the density should be computed
+    * @param posi3 the position at which the density is to be evaluated. 
+    *             This must be in detector-centered coordinates.
+    * @return the density in g/cm^3
+    */
+   const double GetDensityInCGS(const EarthParam& , const LeptonInjector::LI_Position &);
+
+   /**
+    * @brief Computes the material density at the given point.
+    *
+    * @param posi3 the position at which the density is to be evaluated.
+    *             This must be in detector-centered coordinates.
+    * @return the density in g/cm^3
+    */
+   const double GetDensityInCGS(const LeptonInjector::LI_Position &posi3) const;
+
    /**
     * @brief Computes the material density at the given point.
     *
@@ -256,6 +295,15 @@ class EarthModelService
                     const  LeptonInjector::LI_Position &to_posCE, 
                     IntegType intg_type = PATH,
                     const  bool use_electron_density = false) const;
+
+
+    const std::vector<std::tuple<double,double,double>> GetDensitySegments(
+                 const  LeptonInjector::LI_Position &from_posI3,
+                 const  LeptonInjector::LI_Position &to_posI3) const;
+
+    const std::vector<std::tuple<double,double,double>> GetEarthDensitySegments(
+                 const  LeptonInjector::LI_Position &from_posCE,
+                 const  LeptonInjector::LI_Position &to_posCE) const;
  
    
    /**
@@ -542,20 +590,37 @@ class EarthModelService
 
    /**
     * Get MohoBoundary [m]
+    * This may be -1 if the model has no moho boundary
     */
    const double GetMohoBoundary() const { return fMohoBoundary_; }
 
    /**
     * Get Rock-Ice boundary [m]
+    * This will be the outer radius of the uppermost layer of rock if no ice is present
     */
-   const double GetRockIceBoundary() const { return fRockIceBoundary_; }
+   const double GetRockIceBoundary() const { return fOutermostRockBoundary_; }
+
+   /**
+    * Get the outer radius of the uppermost layer of rock [m]
+    * This may be 0 if the model has no rock.
+    */
+   double GetOutermostRockBoundary() const { return fOutermostRockBoundary_; }
+
 
    /**
     * Get Ice-Air boundary [m]
     * If you have simple cap ice, this value is most far Ice-Air boundary
     * from the center of the Earth.
+    * If there is no ice, this is the outer radius of the uppermost layer
+    * which is not part of the atmosphere [m]
     */
-   const double GetIceAirBoundary() const { return fIceAirBoundary_; }
+   const double GetIceAirBoundary() const { return fEarthAirBoundary_; }
+
+   /**
+    * Get the outer radius of the uppermost layer which is not part of the atmosphere [m]
+    * This may be 0 if the model has no layers denser than air.
+    */
+   double GetEarthAirBoundary() const { return fEarthAirBoundary_; }
 
    /**
     * Get Radius of atmosphare [m]
@@ -626,7 +691,7 @@ class EarthModelService
    /**
     * @brief A dummy variable used as a sink for ignored results.
     *
-    * THis variable's value should be considered undefined and it should never be read.
+    * This variable's value should be considered undefined and it should never be read.
     */
    static bool ignored_bool;
 
@@ -648,9 +713,9 @@ class EarthModelService
    /**
     @brief name of EarthModel data file
     */
-   double fMohoBoundary_;    // [m], boundary between mantle and crust
-   double fRockIceBoundary_;  // [m], boundary between rock and ice
-   double fIceAirBoundary_;   // [m], boundary between ice and air
+   double fMohoBoundary_;           // [m], boundary between mantle and crust
+   double fOutermostRockBoundary_;  // [m], boundary between rock and ice
+   double fEarthAirBoundary_;       // [m], boundary between dense material and air
    double fAtmoRadius_;       // [m], Atmosphere radius
 
    double fDetDepth_;   // [m] depth of I3 origin from ice surface

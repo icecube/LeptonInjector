@@ -41,7 +41,7 @@ namespace LeptonInjector {
 
 	// construct a direction for a given vector 
 	LI_Direction::LI_Direction( const LI_Position& vec){
-		this->azimuth = atan( vec.at(1)/ vec.at(0) );
+		this->azimuth = atan2( vec.at(1), vec.at(0) );
 		this->zenith  = acos( vec.at(2)/ vec.Magnitude() );
 	}
 
@@ -236,7 +236,7 @@ namespace LeptonInjector {
 
 	// check if two points are identical
 	// 		maybe use a different epsilon? Not sure. 
-	bool operator == (LI_Position& one, LI_Position& two){
+	bool operator == (LI_Position const & one, LI_Position const & two){
 		for (uint8_t iter=0; iter<n_dimensions; iter++){
 			// check if the difference between each comonent isless than the minimum expressible distance between doubles
 			//		this, as opposed to using '==' is to avoid floating point errors 

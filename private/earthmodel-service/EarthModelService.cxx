@@ -15,6 +15,9 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <numeric>
+#include <algorithm>
+#include <functional>
 #include <earthmodel-service/EarthModelService.h>
 //  #include "earthmodel-service/EarthModelService.h"
 
@@ -35,8 +38,8 @@ static const double CM_TO_M = (LeptonInjector::Constants::cm / LeptonInjector::C
 EarthModelService::EarthModelService() 
   : fPath_(""),
     fMohoBoundary_(-1),
-    fRockIceBoundary_(-1),
-    fIceAirBoundary_(-1),
+    fOutermostRockBoundary_(-1),
+    fEarthAirBoundary_(-1),
     fAtmoRadius_(-1),
     fDetDepth_(1948.0 * LeptonInjector::Constants::m),
     fIceCapTypeString_("SimpleIceCap"),
@@ -97,8 +100,8 @@ EarthModelService::EarthModelService(
       fEarthModelStrings_(earthmodels),
       fMatRatioStrings_(materialmodels),
       fMohoBoundary_(-1),
-      fRockIceBoundary_(-1),
-      fIceAirBoundary_(-1),
+      fOutermostRockBoundary_(-1),
+      fEarthAirBoundary_(-1),
       fAtmoRadius_(-1),
       fDetDepth_(detectordepth),
       fIceCapTypeString_(icecapname),
@@ -150,8 +153,8 @@ void EarthModelService::Init()
    // default values set above may be modified
    // depends on which crust model you choose.
    //
-   SetEarthModel(fEarthModelStrings_);
    SetMaterialModel(fMatRatioStrings_);
+   SetEarthModel(fEarthModelStrings_);
 
    //-----------------------------------------
    // following setting must be done after 
@@ -197,6 +200,10 @@ string EarthModelService::GetMediumTypeString(EarthModelService::MediumType t)
    else if (t == ICE) stype = "ICE";
    else if (t == AIR) stype = "AIR";
    else if (t == VACUUM) stype = "VACUUM";
+   else if (t == WATER) stype = "WATER";
+   else if (t == LOWERMANTLE) stype = "LOWERMANTLE";
+   else if (t == UPPERMANTLE) stype = "UPPERMANTLE";
+   else if (t == LLSVP) stype = "LLSVP";
    return stype;
 }
 
@@ -211,6 +218,11 @@ EarthModelService::ConvertMediumTypeString(const string &s)
    else if (s == "ROCK") t = ROCK;
    else if (s == "ICE") t = ICE;
    else if (s == "AIR") t = AIR;
+   else if (s == "VACUUM") t = VACUUM;
+   else if (s == "WATER") t = WATER;
+   else if (s == "LOWERMANTLE") t = LOWERMANTLE;
+   else if (s == "UPPERMANTLE") t = UPPERMANTLE;
+   else if (s == "LLSVP") t = LLSVP;
    return t;
 }
 
@@ -268,8 +280,8 @@ string EarthModelService::PrintEarthParams() const
            << RadiusToCosZen(i->first) << endl;
    }
    os << "*MohoBoundary      " << fMohoBoundary_ << endl;
-   os << "*RockIceBoundary   " << fRockIceBoundary_ << endl;
-   os << "*IceAirBoundary    " << fIceAirBoundary_ << endl;
+   os << "*RockIceBoundary   " << fOutermostRockBoundary_ << endl;
+   os << "*IceAirBoundary    " << fEarthAirBoundary_ << endl;
    os << "*AtmoRadius        " << fAtmoRadius_ << endl;
    os << "*DetectorDepth     " << fDetDepth_ << endl;
    os << "*IceCapType        " << fIceCapTypeString_ << endl;
@@ -330,7 +342,7 @@ EarthModelService::GetEarthParam(const LeptonInjector::LI_Position & p_CE) const
 
    const EarthParam& ep = iter->second;
    
-   if (r < fRockIceBoundary_) //below all ice everything is simple
+   if (r < fOutermostRockBoundary_) //within rock everything is simple
       return ep;
    
    if (fIceCapType_ != EarthModelService::SIMPLEICECAP) {
@@ -361,6 +373,26 @@ const EarthModelService::MediumType EarthModelService::GetMedium(
 {
    EarthParam ep = EarthModelService::GetEarthParam(p_CE);
    return ep.fMediumType_;
+}
+
+//__________________________________________________________
+const double EarthModelService::GetDensityInCGS(const EarthParam& ep, const LeptonInjector::LI_Position &posi3)
+{
+   LeptonInjector::LI_Position pos=GetEarthCoordPosFromDetCoordPos(posi3);
+   double r = (pos-LeptonInjector::LI_Position(0,0,ep.fZOffset_)).Magnitude(); 
+   return ep.GetDensity(r);
+}
+
+//__________________________________________________________
+const double EarthModelService::GetDensityInCGS(const LeptonInjector::LI_Position &posi3) const
+{
+// 
+// CAUTION !
+// This function returns density in g/cm3!!
+//
+   LeptonInjector::LI_Position pos=GetEarthCoordPosFromDetCoordPos(posi3);
+   const EarthParam& ep = EarthModelService::GetEarthParam(pos);
+   return GetEarthDensityInCGS(ep, pos);
 }
 
 //__________________________________________________________
@@ -478,7 +510,7 @@ const double EarthModelService::GetColumnDepthInCGS(
                  const  bool use_electron_density) const
 {
   LeptonInjector::LI_Position from_pos=GetEarthCoordPosFromDetCoordPos(from_posI3);
-  LeptonInjector::LI_Position to_pos=GetEarthCoordPosFromDetCoordPos(to_posI3); 
+  LeptonInjector::LI_Position to_pos=GetEarthCoordPosFromDetCoordPos(to_posI3);
 
   return IntegrateDensityInCGS(from_pos, to_pos, PATH, use_electron_density);
 }
@@ -709,6 +741,259 @@ const double EarthModelService::IntegrateDensityInCGS(
    return(depth);
 }
 
+const std::vector<std::tuple<double,double,double>> EarthModelService::GetDensitySegments(
+                 const  LeptonInjector::LI_Position &from_posI3,
+                 const  LeptonInjector::LI_Position &to_posI3) const
+{
+  LeptonInjector::LI_Position from_pos=GetEarthCoordPosFromDetCoordPos(from_posI3);
+  LeptonInjector::LI_Position to_pos=GetEarthCoordPosFromDetCoordPos(to_posI3); 
+
+  return GetEarthDensitySegments(from_pos, to_pos);
+}
+
+const std::vector<std::tuple<double,double,double>> EarthModelService::GetEarthDensitySegments(
+                 const  LeptonInjector::LI_Position &from_posCE,
+                 const  LeptonInjector::LI_Position &to_posCE) const
+{
+   bool use_electron_density = true;
+   //std::cout << "Getting earth density segments!" << std::endl;
+
+   LeptonInjector::LI_Position pos(from_posCE);
+   LeptonInjector::LI_Position to_CE(to_posCE);
+
+   LeptonInjector::LI_Direction dirCE(to_CE - pos);
+   double len = (to_CE - pos).Magnitude();
+   
+   const double tinyStepSize=.01 * LeptonInjector::Constants::m;
+   
+   double x=0; //distance traversed so far
+   bool willLeaveAtmosphere=false;
+   
+   typedef std::tuple<double,double,double> Segment;
+   std::vector<Segment> segments;
+
+   // calculate distance to next boundary
+   double distToNext=DistanceToNextBoundaryCrossing(pos,dirCE,willLeaveAtmosphere);
+
+   // get current medium and density
+   EarthParam curMedium=GetEarthParam(pos);
+
+   // only used for GR events' column depth calculations
+   //       the interaction probability should be based off electron number density instead of isoscalar, so we use this 
+   //       offset to approximate that effect 
+   double density_offset;
+   if (use_electron_density){
+        density_offset =  GetPNERatio(curMedium.fMediumType_ , 2212); 
+   }else{
+        density_offset = 1.0;
+   }
+
+   double density=GetEarthDensityInCGS(curMedium,pos)*density_offset; //the current density == d(depth)/dx 
+
+   //log_trace_stream(" Now at " << pos << " having traversed " << x << " meters with " << depth << " gm/cm^2");
+   //log_trace_stream("  Current layer is " << curMedium.fBoundaryName_ << " with current density " << density);
+   //log_trace_stream("  Distance to next layer is " << distToNext << " meters");
+   
+   unsigned int iterations=0;
+   //unsigned int maxIterations=1e6; //if we try to take more steps than this something is horribly wrong
+   unsigned int maxIterations=1000; //if we try to take more steps than this something is horribly wrong
+
+   LeptonInjector::LI_Position lastpos(pos);
+   bool approachingGoal=false;
+
+   while(true){
+      if(++iterations>maxIterations){
+         std::cout << "584 Exceeded iteration count limit. Something is horribly wrong" << std::endl;
+         throw;
+      }
+      
+      //if the density is constant, take a shortcut
+      if(curMedium.fParams_.size()==1){
+
+         //log_trace_stream(" Evaluating constant density material");
+
+         density = GetEarthDensityInCGS(pos)*density_offset; //the current density == d(depth)/dx [g/cm3]
+         approachingGoal = false;
+         if(x+distToNext >= len){
+            //log_trace_stream("  Linearly interpolating remaining distance");
+            distToNext = len-x;
+            approachingGoal = true;
+         }
+
+         //log_trace_stream("  Adding remaining column depth and advancing to next layer");
+         lastpos = pos;
+         x += distToNext;
+         pos = pos + (distToNext * dirCE);
+
+         if (approachingGoal) {
+            //log_trace(" this is final step, exit loop");
+            // leave the loop immediately (and return depth)
+            segments.push_back(Segment(density/density_offset, density, distToNext));
+            break;
+         }
+
+         if(willLeaveAtmosphere){ //we have now done so; there's nothing more to integrate
+            //log_trace_stream(" Stopping at atmosphere boundary");
+
+            // leave the loop immediately (and return depth)
+            segments.push_back(Segment(density/density_offset, density, distToNext));
+            break;
+         }
+
+         std::string oldLayerName=curMedium.fBoundaryName_;
+         //make sure that we actually get into the next layer
+         while(curMedium.fBoundaryName_== oldLayerName){
+            //log_trace_stream("   Taking tiny step toward next layer");
+
+            lastpos = pos;
+            pos = pos + (tinyStepSize * dirCE);
+            distToNext += tinyStepSize;
+
+            x+=tinyStepSize;
+
+            curMedium=GetEarthParam(pos);
+            if(++iterations>maxIterations){
+               std::cout << "Exceeded iteration count limit" << std::endl;
+               throw;
+            }
+         };
+         //std::cout << "Pushing constant density segment!" << std::endl;
+         segments.push_back(Segment(density/density_offset, density, distToNext));
+         if (use_electron_density){
+             density_offset =  GetPNERatio(curMedium.fMediumType_ , 2212); 
+         }else{
+             density_offset = 1.0;
+         }
+         density=GetEarthDensityInCGS(curMedium,pos)*density_offset;
+         distToNext=DistanceToNextBoundaryCrossing(pos,dirCE,willLeaveAtmosphere);
+         assert(distToNext>0);
+         
+         //log_trace_stream(" Now at " << pos << " having traversed " << x << " meters with " << depth << " gm/cm^2");
+         //log_trace_stream("  Current layer is " << curMedium.fBoundaryName_ << " with current density " << density);
+         //log_trace_stream("  Distance to next layer is " << distToNext << " meters");
+         
+         continue;
+      }
+      
+      //otherwise do the integral approximately
+      double h=distToNext;
+      approachingGoal=false;
+      if(x+h>len){
+         //log_trace_stream("   Reducing step size to avoid overshooting target distance");
+         h=len-x;
+         approachingGoal=true;
+      }
+
+      std::vector<double> entries;
+      std::vector<double> distances;
+      unsigned int initial_divisions = 5;
+
+      //std::cout << "Initializing distance entries!" << std::endl;
+      for(unsigned int i=0; i<initial_divisions; ++i) {
+          distances.push_back(h/(initial_divisions-1)*i);
+          entries.push_back(GetEarthDensityInCGS(curMedium,pos+distances.back()*dirCE)*density_offset);
+      }
+
+      std::function<double()> max_reldiff = [&] ()->double {
+          std::vector<double> diff(entries.size()-1);
+          //std::cout << "entries.size() = " << entries.size() << std::endl;
+          std::adjacent_difference(entries.begin(), entries.end(), diff.begin());
+          //std::cout << "diff.size() = " << diff.size() << std::endl;
+          for(unsigned int i=0; i<diff.size(); ++i) {
+              //std::cout << entries[i] << " " << entries[i+1] << " " << diff[i] << std::endl;
+              double reldiff = std::fabs(diff[i]) / ((entries[i] + entries[i+1])/2.0);
+              //std::cout << "reldiff " << reldiff << std::endl;
+              diff[i] = reldiff;
+          }
+          double max = *std::max_element(diff.begin()+1, diff.end());
+          //std::cout << "Max = " << max << std::endl;
+          return max;
+      };
+
+      //std::cout << "Making distance entries to tolerance!" << std::endl;
+      double segment_tol = 0.001;
+      while(max_reldiff() > segment_tol) {
+          assert(entries.size() < 100);
+          //std::cout << "Making finer distance entries!" << std::endl;
+          std::vector<double> new_entries;
+          std::vector<double> new_distances;
+          for(unsigned i=0; i<(entries.size()-1); ++i) {
+              new_entries.push_back(entries[i]);
+              new_distances.push_back(distances[i]);
+              new_distances.push_back((distances[i] + distances[i+1])/2.0);
+              new_entries.push_back(GetEarthDensityInCGS(curMedium,pos+new_distances.back()*dirCE)*density_offset);
+          }
+          new_entries.push_back(entries.back());
+          new_distances.push_back(distances.back());
+          entries.swap(new_entries);
+          distances.swap(new_distances);
+      }
+      //std::cout << "Got " << entries.size()-1 << " fine segments!" << std::endl;
+      for(unsigned int i=0; i<entries.size()-1; ++i) {
+          double segment_density = (entries[i]+entries[i+1])/2.0;
+          double segment_distance = distances[i+1]-distances[i];
+          //std::cout << "Adding fine segment!" << std::endl;
+          segments.push_back(Segment(segment_density/density_offset, segment_density, segment_distance));
+      }
+
+      x+=h;
+      pos= pos + (distToNext*dirCE);
+      
+      if(willLeaveAtmosphere){ //we have now done so; there's nothing more to integrate
+         //log_trace_stream(" Stopping at atmosphere boundary");
+         break;
+      }
+      if(approachingGoal) //done
+         break;
+      
+      std::string oldLayerName=curMedium.fBoundaryName_;
+      //make sure that we actually get into the next layer
+      entries.clear();
+      distances.clear();
+      distToNext = 0;
+      while(curMedium.fBoundaryName_==oldLayerName){
+         //log_trace_stream("   Taking tiny step toward next layer");
+
+         lastpos = pos;
+         density=GetEarthDensityInCGS(curMedium,pos)*density_offset;
+         pos += tinyStepSize * dirCE;
+         distToNext += tinyStepSize;
+         entries.push_back(density/density_offset);
+         distances.push_back(density);
+
+         x+=tinyStepSize;
+         if (use_electron_density){
+                density_offset =  GetPNERatio(curMedium.fMediumType_ , 2212); 
+         }else{
+                density_offset = 1.0;
+         }
+         curMedium=GetEarthParam(pos);
+         if(++iterations>maxIterations){
+            std::cout << "Exceeded iteration count limit" << std::endl;
+            throw;
+         }
+      };
+      //std::cout << "Adding buffer segment!" << std::endl;
+      segments.push_back(
+              Segment(
+                  std::accumulate(entries.begin(), entries.end(), 0)/entries.size(),
+                  std::accumulate(distances.begin(), distances.end(), 0)/distances.size(),
+                  distToNext));
+      density=GetEarthDensityInCGS(curMedium,pos)*density_offset;
+      distToNext=DistanceToNextBoundaryCrossing(pos,dirCE,willLeaveAtmosphere);
+      assert(distToNext>0);
+      
+      //log_trace_stream(" Now at " << pos << " having traversed " << x << " meters with " << depth << " gm/cm^2");
+      //log_trace_stream("  Current layer is " << curMedium.fBoundaryName_ << " with current density " << density);
+      //log_trace_stream("  Distance to next layer is " << distToNext << " meters");
+
+   } // while loop end
+   
+   //log_trace_stream(" Len error: " << len-x);
+   //std::cout << "Got " << segments.size() << " earth density segments!" << std::endl;
+   return(segments);
+}
+
 //________________________________________________________________
 bool EarthModelService::CheckIntersectionWithLayer(
                        const LeptonInjector::LI_Position& pos,
@@ -759,7 +1044,7 @@ bool EarthModelService::CheckIntersectionWithLayer(
    }
    
    if(isect>=1){
-      // update the given crosestDist
+      // update the given closestDist
       //log_trace_stream("     dist=" << dist);
       if(dist<closestDist){
          closestDist=dist;
@@ -793,7 +1078,7 @@ double EarthModelService::DistanceToNextBoundaryCrossing(
       CheckIntersectionWithLayer(pos,dir,it,closestBoundary1,closestDist,willExit);
       
       //if we're not inside an ice, air, or vacuum layer, there can be no ice further down
-      ignoreIce=!(it->second.fMediumType_==ICE || it->second.fMediumType_==AIR || it->second.fMediumType_==VACUUM);
+      ignoreIce=!(it->second.fMediumType_==WATER || it->second.fMediumType_==ICE || it->second.fMediumType_==AIR || it->second.fMediumType_==VACUUM);
       if(ignoreIce)
          //log_trace_stream("    Inside medium type " << it->second.fMediumType_ << ", ignoring ice");
       
@@ -828,12 +1113,8 @@ double EarthModelService::DistanceToNextBoundaryCrossing(
       }
    }
    
-   //
-   // test outermost layer of the Earth (should be air)
-   //
-   it=fEarthParams_.end();
-   it--;
-   exitsAtmosphere=(willExit && closestDist==dist1 && closestBoundary1==it);
+   // check for leaving the atmosphere
+   exitsAtmosphere=(willExit && closestDist==dist1 && closestBoundary1->first==fAtmoRadius_);
    return(closestDist);
 }
 
@@ -1239,7 +1520,7 @@ EarthModelService::GetDistanceFromEarthEntranceToDetector(double zenrad) const
 //
    if (zenrad > LeptonInjector::Constants::pi) throw("zenrad exceeds pi!");
    if (zenrad < 0) throw("zenrad is negative!");
-   if (fIceCapType_ == NOICE && fDetPos_.GetZ() > fRockIceBoundary_) {
+   if (fIceCapType_ == NOICE && fDetPos_.GetZ() > fOutermostRockBoundary_) {
       //log_notice("Detector Center is outside of Ice/Rock. return 0.");
       return 0.;
    }
@@ -1249,13 +1530,13 @@ EarthModelService::GetDistanceFromEarthEntranceToDetector(double zenrad) const
    double radius = -1;
    switch (fIceCapType_) {
       case EarthModelService::NOICE :
-         radius = fRockIceBoundary_;
+         radius = fOutermostRockBoundary_;
          break;
       case EarthModelService::ICESHEET :
-         radius = fIceAirBoundary_;
+         radius = fEarthAirBoundary_;
          break;
       case EarthModelService::SIMPLEICECAP :
-         radius = fRockIceBoundary_;
+         radius = fOutermostRockBoundary_;
          break;
       default :
          throw std::runtime_error("IceCapType "+std::to_string(int(fIceCapType_))+" is not supported");
@@ -1402,13 +1683,28 @@ EarthModelService::GetDistanceFromSphereSurfaceToDetector(
 //__________________________________________________________
 void EarthModelService::SetEarthModel(const vector<string> & s)
 {
+   auto isLithosphere=[](MediumType med){
+       return(med==INNERCORE || med==OUTERCORE || med==MANTLE || med==ROCK
+               || med==LOWERMANTLE || med==UPPERMANTLE || med==LLSVP);
+   };
+   auto isHydrosphere=[](MediumType med){
+       return(med==WATER || med==ICE);
+   };
+   //vacuum gets to count with the atmosphere as stuff that needs to go on the
+   //outside of the model
+   auto isAtmosphere=[](MediumType med){
+       return(med==AIR || med==VACUUM);
+   };
+   //we require that the planet be contructed from the center outwards as a
+   //lithosphere, hydrosphere, then an atmosphere
+   bool reachedHydrosphere=false, reachedAtmosphere=false;
 
    // clear params
    fEarthParams_.clear();
    fIceParams_.clear();
    fMohoBoundary_ = -1;
-   fRockIceBoundary_ = -1;
-   fIceAirBoundary_ = -1;
+   fOutermostRockBoundary_ = -1;
+   fEarthAirBoundary_ = -1;
    fAtmoRadius_ = -1;
 
    for (unsigned int i = 0; i<s.size(); ++i) {
@@ -1419,7 +1715,7 @@ void EarthModelService::SetEarthModel(const vector<string> & s)
       // 
       // check earthmodel file
       //
-      string fname1 = fPath_ + "densities/" + earth_model;
+      string fname1 = (earth_model.find('/')==std::string::npos ? fPath_ + "densities/" + earth_model : earth_model);
       ifstream in(fname1.c_str());
 
       // if the earthmodel file doesn't exist, stop simulation 
@@ -1436,7 +1732,6 @@ void EarthModelService::SetEarthModel(const vector<string> & s)
       string label, medtype;
       double radius, param;
       int  nparams;
-      bool reachedIce=false, reachedAir=false;
 
       while(getline(in,buf)) {
          {
@@ -1463,7 +1758,12 @@ void EarthModelService::SetEarthModel(const vector<string> & s)
          ep.fUpperRadius_ = radius;
          ep.fZOffset_ = 0;
          ep.fBoundaryName_ = label;
-         ep.fMediumType_ = ConvertMediumTypeString(medtype); 
+         ep.fMediumType_ = ConvertMediumTypeString(medtype);
+         if(fMatRatioMap_.find(ep.fMediumType_)==fMatRatioMap_.end()) {
+             std::stringstream ss;
+             ss << "Earth model uses undefined material " << medtype;
+             throw(ss.str());
+         }
          for (int i=0; i<nparams; ++i) {
             ss >> param;
             ep.fParams_.push_back(param);
@@ -1472,34 +1772,33 @@ void EarthModelService::SetEarthModel(const vector<string> & s)
          // set static params
          if (label == "moho_boundary") {
             fMohoBoundary_ = radius;
-         } else if (label == "rockice_boundary") {
-            fRockIceBoundary_ = radius;
-         } else if (label == "iceair_boundary") {
-            fIceAirBoundary_ = radius;
-         } else if (label == "atmo_radius") {
-            fAtmoRadius_ = radius;
          }
-         
+
          //stop the process if layering assumptions are violated
-         switch(ep.fMediumType_){
-            case ICE:
-               if(reachedAir)
-                  throw("No ice layers can be specified after an air layer has been specified");
-               reachedIce=true;
-               break;
-            case AIR:
-               reachedAir=true;
-               break;
-            case VACUUM:
-               throw("Explicit vacuum layers are not supported\n"
-                         "(Note that beyond the last specified layer vacuum will be assumed implicitly)");
-               break;
-            default:
-               if(reachedIce)
-                  throw("Only ice and air layers may be specified after the first ice layer");
-               if(reachedAir)
-                  throw("Only air layers may be specified after the first air layer");
-         }
+		 if(isLithosphere(ep.fMediumType_)){
+		   //std::cout << "Layer " << label << " is part of the lithosphere" << std::endl;
+		   if(reachedHydrosphere || reachedAtmosphere)
+		 	 throw("No rock layers can be specified after an air/water/ice layer has been specified");
+		 	 fOutermostRockBoundary_ = radius; //set or update
+		 	 fEarthAirBoundary_ = radius; //set or update
+		 }
+		 else if(isHydrosphere(ep.fMediumType_)){
+		   //std::cout << "Layer " << label << " is part of the hydrosphere" << std::endl;
+		   if(reachedAtmosphere)
+		 	 throw("No water/ice layers can be specified after an air layer has been specified");
+		   if(!reachedHydrosphere)
+		 	 reachedHydrosphere=true;
+		   fEarthAirBoundary_ = radius; //set or update
+		 }
+		 else if(isAtmosphere(ep.fMediumType_)){
+		   //std::cout << "Layer " << label << " is part of the atmosphere" << std::endl;
+		   if(!reachedAtmosphere)
+		 	 reachedAtmosphere=true;
+		   fAtmoRadius_ = radius; //set or update
+		 }
+		 else{
+		   throw("Unexpected layer type");
+		 }
 
          // put params in map
          // earth_radius does not describe a physical boundary, so it does not go in the map
@@ -1517,21 +1816,36 @@ void EarthModelService::SetEarthModel(const vector<string> & s)
       in.close();
    }
 
-   if (fEarthParams_.size()<1) {
-      throw("Failed to fill crust params!");
-   }
+   if(fEarthParams_.empty() && fIceParams_.empty())
+      throw("Earth model has no material layers!");
 
    if (fMohoBoundary_ < 0) {
-      throw("Failed to fill moho_boundary! check data file");
+	  throw("Model has no moho_boundary");
    }
-   if (fRockIceBoundary_ < 0) {
-      throw("Failed to fill rockice_boundary! check data file");
+   if (fOutermostRockBoundary_ < 0) {
+      fOutermostRockBoundary_ = 0;
    }
-   if (fIceAirBoundary_ < 0) {
-      throw("Failed to fill iceair_boundary! check data file");
+   if (fEarthAirBoundary_ < 0) {
+      fEarthAirBoundary_ = 0;
+      //log_warn("fEarthAirBoundary_ not set; model appears to have no dense layers?");
    }
    if (fAtmoRadius_ < 0) {
-      throw("Failed to fill atmo_radius! check data file");
+     //log_info("Model has no atmosphere, using the radius of the outermost material layer as fAtmoRadius_");
+     if(!fIceParams_.empty())
+        fAtmoRadius_ = fIceParams_.rbegin()->first;
+     else if(!fEarthParams_.empty())
+        fAtmoRadius_ = fEarthParams_.rbegin()->first;
+   }
+   //add a sentinal layer of vacuum surrounding everything else
+   {
+        double infinity=std::numeric_limits<double>::infinity();
+        EarthParam ep;
+        ep.fUpperRadius_=infinity;
+        ep.fZOffset_=0;
+        ep.fBoundaryName_="space";
+        ep.fMediumType_=VACUUM; //SetMaterialModel ensures that this is always defined
+        ep.fParams_={0};
+        fEarthParams_[infinity]=ep;
    }
 
    //
@@ -1589,7 +1903,7 @@ void EarthModelService::SetMaterialModel(const vector<string>& s)
       // 
       // check earthmodel file
       //
-      string fname1 = fPath_ + "materials/" + matratio;
+	  string fname1 = (matratio.find('/')==std::string::npos ? fPath_ + "materials/" + matratio : matratio);
       ifstream in(fname1.c_str());
 
       if (in.fail())
@@ -1650,6 +1964,10 @@ void EarthModelService::SetMaterialModel(const vector<string>& s)
       in.close();
    }
 
+   //make sure that vacuum is always defined
+   if(!fMatRatioMap_.count(VACUUM))
+      fMatRatioMap_[VACUUM]={};
+
    //
    // calculate P, N, E ratio
    //
@@ -1669,6 +1987,8 @@ void EarthModelService::SetMaterialModel(const vector<string>& s)
          tot_nn += nn;
       }
       int tot_z = tot_np + tot_nn;
+	  if(tot_z==0)
+	     tot_z=1; //avoid division by zero
       double nw_proton = tot_np / tot_z;
       double nw_neutron = tot_nn / tot_z;
       map<int, double> number_weights;
@@ -1748,7 +2068,7 @@ void EarthModelService::SetIceCapSimpleAngle(double cap_angle)
    //double sintheta = sqrt((1-costheta)*(1+costheta));
 
    // get largest depth of ice
-   double h = fIceAirBoundary_ - fRockIceBoundary_ ;
+   double h = fEarthAirBoundary_ - fOutermostRockBoundary_ ;
    // h : max depth of ice at south pole
    // d + h = radius of icecap
    // r = bed_rock radius
@@ -1758,7 +2078,7 @@ void EarthModelService::SetIceCapSimpleAngle(double cap_angle)
    //                     - 2*r*(r-d)*costheta
    // d = (r^2*(1-costheta) - 0.5*h^2) / (h + r*(1-costheta))
    //
-   double r = fRockIceBoundary_;
+   double r = fOutermostRockBoundary_;
    double d = (r*r*(1 - costheta) - 0.5*h*h) / (h + r*(1 - costheta));
    
    fIceCapSimpleRadius_ = d + h; // radius of sphere of icecap
@@ -1785,7 +2105,7 @@ void EarthModelService::SetIceCapSimpleAngle(double cap_angle)
    //log_info("Icecap Angle %f[deg], Icecap Radius %f [m], BedRock radius %f [m], Zshift %f [m] are set",
    //          fIceCapSimpleAngle_/LeptonInjector::Constants::deg,
    //          fIceCapSimpleRadius_/LeptonInjector::Constants::m,
-   //          fRockIceBoundary_/LeptonInjector::Constants::m,
+   //          fOutermostRockBoundary_/LeptonInjector::Constants::m,
    //          fIceCapSimpleZshift_/LeptonInjector::Constants::m);
 }
 
@@ -1793,7 +2113,7 @@ void EarthModelService::SetIceCapSimpleAngle(double cap_angle)
 void EarthModelService::SetDetectorDepth(double d)
 {          
    fDetDepth_ = d;
-   fDetPos_.SetZ(fIceAirBoundary_ - d);
+   fDetPos_.SetZ(fEarthAirBoundary_ - d);
 }
 
 //__________________________________________________________
