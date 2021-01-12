@@ -105,3 +105,11 @@ This project also received contributions and suggestions from internal IceCube r
 LeptonInjector and LeptonWeighter: A neutrino event generator and weighter for neutrino observatories
 IceCube Collaboration
 https://arxiv.org/abs/2012.10449
+
+## CRediT
+
+**Austin Schneider**: Software, Validation, Writing - Original Draft, Writing - Review & Editing;
+**Benjamin Jones**: Conceptualization, Validation;
+**Benjamin Smithers**: Software, Validation, Writing - Original Draft, Visualization, Writing - Review & Editing;
+**Carlos Argüelles**: Conceptualization, Software, Writing - Original Draft, Writing - Review & Editing, Supervision;
+**Chris Weaver**: Methodology, Software, Writing - Review & Editing
