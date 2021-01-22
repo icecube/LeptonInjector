@@ -330,19 +330,19 @@ void DataWriter::writeVolumeConfig( BasicInjectionConfiguration& config ){
     writeBlockHeader(this->lic_file_output,dataSize,"VolumeInjectionConfiguration",1);
     //write data
     this->lic_file_output << little_endian(config.events)
-        << little_endian(config.energyMinimum/Constants::GeV)
-        << little_endian(config.energyMaximum/Constants::GeV)
-        << little_endian(config.powerlawIndex)
-        << little_endian(config.azimuthMinimum/Constants::radian)
-        << little_endian(config.azimuthMaximum/Constants::radian)
-        << little_endian(config.zenithMinimum/Constants::radian)
-        << little_endian(config.zenithMaximum/Constants::radian)
-        << little_endian(config.finalType1)
-        << little_endian(config.finalType2)
-        << little_endian(config.crossSectionBlob)
-        << little_endian(config.totalCrossSectionBlob)
-        << little_endian(config.cylinderRadius/Constants::meter)
-        << little_endian(config.cylinderHeight/Constants::meter);
+    << little_endian(config.energyMinimum/Constants::GeV)
+    << little_endian(config.energyMaximum/Constants::GeV)
+    << little_endian(config.powerlawIndex)
+    << little_endian(config.azimuthMinimum/Constants::radian)
+    << little_endian(config.azimuthMaximum/Constants::radian)
+    << little_endian(config.zenithMinimum/Constants::radian)
+    << little_endian(config.zenithMaximum/Constants::radian)
+    << little_endian(config.finalType1)
+    << little_endian(config.finalType2)
+    << little_endian(config.crossSectionBlob)
+    << little_endian(config.totalCrossSectionBlob)
+    << little_endian(config.cylinderRadius/Constants::meter)
+    << little_endian(config.cylinderHeight/Constants::meter);
     if(!this->lic_file_output.good()){
         std::cout << "Writing volume injection config block failed" << std::endl;
         throw;
@@ -472,9 +472,15 @@ void DataWriter::makeTables(){
     dataSize += 8; // int32_t - finalType1 // yeah, this should be 4 bytes. BUT hdf5 is /really/ dumb about data sizes 
     dataSize += 8; // int32_t - finalType2
     dataSize += 8; // int32_t - initialType
-    dataSize += 8; // double - mHNL
     dataSize += 8; // double - impactParam OR radius
     dataSize += 8; // double - totalColumnDepth or z
+    dataSize += 8; // double - mHNL
+    dataSize += 8; // double - mHNL_min
+    dataSize += 8; // double - mHNL_max
+    dataSize += 8; // double - distance
+    dataSize += 8; // double - distanceMin
+    dataSize += 8; // double - distanceMax
+    dataSize += 8; // double - lifetime 
     
     herr_t status; // hdf5 error type. 
     hid_t basicPropertiesTable = H5Tcreate(H5T_COMPOUND, dataSize);
@@ -495,6 +501,12 @@ void DataWriter::makeTables(){
     status = H5Tinsert(basicPropertiesTable, "finalType2", HOFFSET(BasicEventProperties, finalType2) , real_long);
     status = H5Tinsert(basicPropertiesTable, "initialType", HOFFSET(BasicEventProperties, initialType) , real_long); 
     status = H5Tinsert(basicPropertiesTable, "mHNL", HOFFSET(BasicEventProperties, mHNL) , H5T_NATIVE_DOUBLE); 
+    status = H5Tinsert(basicPropertiesTable, "mHNL_min", HOFFSET(BasicEventProperties, mHNL_min) , H5T_NATIVE_DOUBLE); 
+    status = H5Tinsert(basicPropertiesTable, "mHNL_max", HOFFSET(BasicEventProperties, mHNL_max) , H5T_NATIVE_DOUBLE); 
+    status = H5Tinsert(basicPropertiesTable, "distance", HOFFSET(BasicEventProperties, distance) , H5T_NATIVE_DOUBLE); 
+    status = H5Tinsert(basicPropertiesTable, "distanceMin", HOFFSET(BasicEventProperties, distanceMin) , H5T_NATIVE_DOUBLE); 
+    status = H5Tinsert(basicPropertiesTable, "distanceMax", HOFFSET(BasicEventProperties, distanceMax) , H5T_NATIVE_DOUBLE); 
+    status = H5Tinsert(basicPropertiesTable, "lifetime", HOFFSET(BasicEventProperties, lifetime) , H5T_NATIVE_DOUBLE); 
 
     // we want tables for volume and ranged, so let's copy that basic one and make the (slightly) different ones below
     rangedPropertiesTable = H5Tcopy( basicPropertiesTable );

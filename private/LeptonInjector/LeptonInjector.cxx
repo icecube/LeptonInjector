@@ -211,12 +211,17 @@ namespace LeptonInjector{
 					energy
 		);
 
+		double mHNL_min = 0.1;
+		double mHNL_max = 3.;
+		double distanceMin = 0.;
+		double distanceMax = 1000.;
+
 		// HNL parameters
-		double mHNL = random->Uniform(0.1,std::min((1-fs.y)*energy,3.))*Constants::GeV;
+		double mHNL = random->Uniform(mHNL_min,std::min((1-fs.y)*energy,mHNL_max))*Constants::GeV;
 		double gamma = ((1-fs.y)*energy)/mHNL;
 		double speed = sqrt(1-pow(1./gamma,2))*Constants::c;
-		double lifetime_min = (5.*Constants::m)/(gamma*speed);
-		double lifetime_max = (500.*Constants::m)/(gamma*speed);
+		double lifetime_min = distanceMin/(gamma*speed);
+		double lifetime_max = distanceMax/(gamma*speed);
 		double lifetime_rest = random->Uniform(lifetime_min,lifetime_max);
 		double lifetime_boosted = gamma*lifetime_rest;
 		LI_Position vertex_daughters = vertex + rotateRelative(dir,relativeZeniths.first,azimuth1)*speed*lifetime_boosted;
@@ -267,6 +272,14 @@ namespace LeptonInjector{
 		properties.finalType2= static_cast<int32_t>(config.finalType2);
 		properties.initialType=static_cast<int32_t>(deduceInitialType(config.finalType1, config.finalType2));
 		properties.mHNL=mHNL;
+		properties.mHNL_min=mHNL_min;
+		properties.mHNL_max=mHNL_max;
+		properties.distance=lifetime_boosted*speed;
+		properties.distanceMin=distanceMin;
+		properties.distanceMax=distanceMax;
+		properties.lifetime=lifetime_boosted;
+		//properties.energy_cascade0=kineticEnergy(config.finalType2,fs.y*energy);
+		//properties.energy_cascade1=energy_daughters;
 	}
 	
 	//-----------------------

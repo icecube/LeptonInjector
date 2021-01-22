@@ -18,7 +18,11 @@ namespace LeptonInjector{
 	injectionRadius(1200*LeptonInjector::Constants::m),
 	endcapLength(1200*LeptonInjector::Constants::m),
 	cylinderRadius(1200*LeptonInjector::Constants::m),
-	cylinderHeight(1200*LeptonInjector::Constants::m)
+	cylinderHeight(1200*LeptonInjector::Constants::m),
+	mHNL_min(0.1*Constants::GeV),
+	mHNL_max(3.0*Constants::GeV),
+	distanceMin(0.0*LeptonInjector::Constants::m),
+	distanceMax(1000.0*LeptonInjector::Constants::m)
 	{}
 
 	// Fills the blobs of the BIC in order to transcribe these into the LIC files. 

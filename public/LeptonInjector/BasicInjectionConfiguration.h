@@ -43,6 +43,9 @@ namespace LeptonInjector {
 		double cylinderRadius;
 		///Height of the origin-centered vertical cylinder within which to inject events
 		double cylinderHeight;
+
+		double mHNL_min, mHNL_max; // HNL mass range
+		double distanceMin, distanceMax; // Range for the distance between the two cascades
 		
 		std::vector<char> crossSectionBlob;
 		std::vector<char> totalCrossSectionBlob;

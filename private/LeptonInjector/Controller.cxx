@@ -58,7 +58,6 @@ namespace LeptonInjector {
         this->endcapLength    = endcapLength;
         this->cylinderRadius  = cylinderRadius;
         this->cylinderHeight  = cylinderHeight;
-
     }
 
 
