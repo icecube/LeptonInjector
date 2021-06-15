@@ -71,6 +71,10 @@ namespace LeptonInjector {
         this->earthModel = earthModel_;
     }
 
+    void Controller::setEarthModel(const std::string & earthModelName_, const std::string & earthModelTablePath_){
+        this->earthModel = std::make_shared<earthmodel::EarthModelService>(earthModelName_, earthModelTablePath_);
+    }
+
     void Controller::NameOutfile( std::string out_file_){
         out_file = out_file_;
     }

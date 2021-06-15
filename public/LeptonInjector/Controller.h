@@ -73,6 +73,8 @@ class Controller{
         
         // changes the Earth model to be used with the injectors
         void SetEarthModel(std::shared_ptr<earthmodel::EarthModelService> earthModel);
+        void setEarthModel(const std::string & earthmodel, const std::string &earthmodelpath);
+
         // adds a new injector to be used in the process 
         void AddInjector(Injector configs_received);
         // changes the name of the data file

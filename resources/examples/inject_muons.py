@@ -22,8 +22,8 @@ n_events    = 55000
 diff_xs     = xs_folder + "/test_xs.fits"
 total_xs    = xs_folder + "/test_xs_total.fits"
 is_ranged   = True
-final_1     = LI.Particle.MuMinus
-final_2     = LI.Particle.Hadrons
+final_1     = LI.Particle.ParticleType.MuMinus
+final_2     = LI.Particle.ParticleType.Hadrons
 the_injector = LI.Injector( n_events , final_1, final_2, diff_xs, total_xs, is_ranged)
 
 
@@ -42,7 +42,9 @@ maxAzimuth  = 180.*deg
 # construct the controller 
 controller  = LI.Controller( the_injector, minE, maxE, gamma, minAzimuth, maxAzimuth, minZenith, maxZenith)  
 
-# specify the output
+# specify the output, earth model
+path_to = os.path.join(os.path.dirname(__file__), "..","earthparams/")
+controller.SetEarthModel("Planet", path_to)
 controller.NameOutfile("./data_output.h5")
 controller.NameLicFile("./config.lic")
 
