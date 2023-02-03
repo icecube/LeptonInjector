@@ -111,7 +111,9 @@ BOOST_PYTHON_MODULE(EarthModelService){
 	const EarthModelService::MatRatioMap (EarthModelService::*GetMatRatioMap)() const = &EarthModelService::GetMatRatioMap;
 	const std::map<int, double>& (EarthModelService::*GetMediumMatRatioMap)(EarthModelService::MediumType) const = &EarthModelService::GetMatRatioMap;
 
-	class_<EarthModelService>("EarthModelService", init<const std::string&, const std::string&, const std::vector<std::string>&, const std::vector<std::string>&, const std::string&, double, double>())
+	class_<EarthModelService>("EarthModelService", init<const std::string&, const std::string&, const std::vector<std::string>&, const std::vector<std::string>&, const std::string&, double, double>(
+        (args("name"), args("table path"), args("earth models"),args("material models"), args("ice cap name"), args("ice cap angle"), args("detector depth")))
+    )
 		// .def("GetMediumTypeString",&EarthModelService::GetMediumTypeString)
 		// .def("ConvertMediumTypeString",&EarthModelService::ConvertMediumTypeString)
 		.def("GetEarthParam",&EarthModelService::GetEarthParam, return_value_policy<copy_const_reference>())

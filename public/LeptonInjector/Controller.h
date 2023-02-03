@@ -72,7 +72,7 @@ class Controller{
             double cylinderRadius=1200*Constants::m, double cylinderHeight= 1200*Constants::m);
         
         // changes the Earth model to be used with the injectors
-        void SetEarthModel(std::shared_ptr<earthmodel::EarthModelService> earthModel);
+        void SetEarthModel(const earthmodel::EarthModelService &earthModel);
         void setEarthModel(const std::string & earthmodel, const std::string &earthmodelpath);
 
         // adds a new injector to be used in the process 

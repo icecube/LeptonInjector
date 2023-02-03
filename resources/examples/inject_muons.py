@@ -7,6 +7,7 @@
 #   + tells the operator to execute the process 
 
 import LeptonInjector as LI
+import EarthModelService as em
 from math import pi
 import os 
 
@@ -21,8 +22,8 @@ xs_folder = os.path.join( os.path.dirname(__file__), '..' )
 n_events    = 55000
 diff_xs     = xs_folder + "/test_xs.fits"
 total_xs    = xs_folder + "/test_xs_total.fits"
-is_ranged   = True
-final_1     = LI.Particle.ParticleType.MuMinus
+is_ranged   = False
+final_1     = LI.Particle.ParticleType.EMinus
 final_2     = LI.Particle.ParticleType.Hadrons
 the_injector = LI.Injector( n_events , final_1, final_2, diff_xs, total_xs, is_ranged)
 
@@ -43,10 +44,15 @@ maxAzimuth  = 180.*deg
 controller  = LI.Controller( the_injector, minE, maxE, gamma, minAzimuth, maxAzimuth, minZenith, maxZenith)  
 
 # specify the output, earth model
-path_to = os.path.join(os.path.dirname(__file__), "..","earthparams/")
-controller.SetEarthModel("Planet", path_to)
+earth_params = os.path.abspath(os.path.join(os.path.dirname(__file__), "..","earthparams")) +"/"
+earth = em.EarthModelService("earth", earth_params, ["PREM_mmc"],["Standard"],"SimpleIceCap", 20*LI.Constants.degrees, 3500*LI.Constants.m)
+
+controller.SetEarthModelService(earth)
+#path_to = os.path.join(os.path.dirname(__file__), "..","earthparams/")
+#controller.SetEarthModel("Planet", path_to)
+
 controller.NameOutfile("./data_output.h5")
 controller.NameLicFile("./config.lic")
+#run the sim
 
-# run the simulation
 controller.Execute()
