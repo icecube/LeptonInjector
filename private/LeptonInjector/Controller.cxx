@@ -1,5 +1,6 @@
 #include <LeptonInjector/Controller.h>
 
+#include <stdexcept>
 
 namespace LeptonInjector {
 

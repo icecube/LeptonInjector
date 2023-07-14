@@ -18,6 +18,7 @@
 #include <numeric>
 #include <algorithm>
 #include <functional>
+#include <stdexcept>
 #include <earthmodel-service/EarthModelService.h>
 //  #include "earthmodel-service/EarthModelService.h"
 

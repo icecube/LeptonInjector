@@ -1,6 +1,7 @@
 #include <I3Test.h>
 
 #include <fstream>
+#include <stdexcept>
 
 #include <icetray/I3Tray.h>
 #include <dataclasses/physics/I3MCTreeUtils.h>

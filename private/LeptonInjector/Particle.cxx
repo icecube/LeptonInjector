@@ -2,6 +2,7 @@
 #include <LeptonInjector/Particle.h>
 #include <assert.h>
 #include <map>
+#include <stdexcept>
 
 namespace LeptonInjector{
     Particle::Particle(void){

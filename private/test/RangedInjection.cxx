@@ -1,6 +1,7 @@
 #include <I3Test.h>
 
 #include <fstream>
+#include <stdexcept>
 
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_monte.h>

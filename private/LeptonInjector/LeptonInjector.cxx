@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <fstream>
+#include <stdexcept>
 
 // namespace constants = boost::math::constants;
 
