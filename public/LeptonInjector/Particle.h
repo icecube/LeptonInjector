@@ -10,7 +10,7 @@
 #include <string>
 #include <exception>
 #include <utility> // std::pair
-
+#include <cstdint>
 #include <LeptonInjector/Constants.h>
 
 // positions are in Cartesian, centered in the middle of IceCube

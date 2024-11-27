@@ -6,7 +6,7 @@
 #include <exception> //allows throwing the out_of_range exception
 #include <limits> //numeric limits
 #include <iostream>
-
+#include <cstdint>
 // Ben Smithers
 // benjamin.smithers@mavs.uta.edu
 
