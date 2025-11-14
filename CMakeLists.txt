@@ -183,6 +183,27 @@ IF(PYTHON_FOUND)
     elseif(Python_SITELIB)
         INSTALL(TARGETS LeptonInjector LIBRARY DESTINATION ${Python_SITELIB})
     endif()
+
+    LIST( APPEND python_earth_private
+        ${CMAKE_SOURCE_DIR}/private/pybindings/earthmodel-service.cxx
+    )
+
+    add_library( EarthModelService SHARED ${python_earth_private})
+    set_target_properties( EarthModelService PROPERTIES LINKER_LANGUAGE CXX OUTPUT_NAME "EarthModelService" PREFIX "" SUFFIX ".so")
+    target_include_directories( EarthModelService PRIVATE ${PYTHON_INCLUDE_DIR})
+    target_link_libraries(EarthModelService PRIVATE lepton_injector ${Boost_LIBRARIES} ${Python_LIBRARIES})
+    include_directories(${Boost_INCLUDE_DIRS})
+    
+    EXECUTE_PROCESS( COMMAND ${PYTHON_EXECUTABLE} -c
+        "from distutils.sysconfig import get_python_lib; print(get_python_lib(prefix=''))"
+        OUTPUT_VARIABLE PYTHON_MODULE_DIR
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(PYTHON_MODULE_DIR)
+        INSTALL(TARGETS EarthModelService LIBRARY DESTINATION ${PYTHON_MODULE_DIR})
+    elseif(Python_SITELIB)
+        INSTALL(TARGETS EarthModelService LIBRARY DESTINATION ${Python_SITELIB})
+    endif()
+
 ELSE(NOT PYTHON FOUND)
     MESSAGE("-- no python. skipping")
 ENDIF(PYTHON_FOUND)
