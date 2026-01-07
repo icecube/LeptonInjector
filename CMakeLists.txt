@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.3.2 FATAL_ERROR)
-cmake_policy(VERSION 3.3.2)
+cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+cmake_policy(VERSION 3.5)
 
 
 #TODO
@@ -174,8 +174,18 @@ IF(PYTHON_FOUND)
     target_link_libraries(LeptonInjector PRIVATE lepton_injector ${Boost_LIBRARIES} ${Python_LIBRARIES})
     include_directories(${Boost_INCLUDE_DIRS})
     
+    # Use sysconfig (Python 3.2+) with fallback to distutils (deprecated in 3.10, removed in 3.12)
     EXECUTE_PROCESS( COMMAND ${PYTHON_EXECUTABLE} -c
-        "from distutils.sysconfig import get_python_lib; print(get_python_lib(prefix=''))"
+        "try:
+    import sysconfig
+    import os
+    # Get platlib relative to prefix
+    platlib = sysconfig.get_path('platlib')
+    prefix = sysconfig.get_config_var('prefix')
+    print(os.path.relpath(platlib, prefix))
+except:
+    from distutils.sysconfig import get_python_lib
+    print(get_python_lib(prefix=''))"
         OUTPUT_VARIABLE PYTHON_MODULE_DIR
         OUTPUT_STRIP_TRAILING_WHITESPACE)
     if(PYTHON_MODULE_DIR)
