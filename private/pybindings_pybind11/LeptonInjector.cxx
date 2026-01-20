@@ -20,6 +20,8 @@
 #include <LeptonInjector/Controller.h>
 #include <LeptonInjector/Random.h>
 #include <LeptonInjector/Constants.h>
+#include <earthmodel-service/EarthModelService.h>
+#include <earthmodel-service/EarthModelCalculator.h>
 
 namespace py = pybind11;
 using namespace pybind11::literals;
@@ -355,4 +357,286 @@ PYBIND11_MODULE(LeptonInjector, m) {
     constants.attr("thetaWeinberg") = Constants::thetaWeinberg;
     constants.attr("gravConstant") = Constants::gravConstant;
     constants.attr("fineStructure") = Constants::fineStructure;
+
+    // =========================================================================
+    // Earth Model Services
+    // =========================================================================
+
+    using namespace earthmodel;
+
+    // MediumType enum
+    py::enum_<EarthModelService::MediumType>(m, "MediumType")
+        .value("INNERCORE", EarthModelService::INNERCORE)
+        .value("OUTERCORE", EarthModelService::OUTERCORE)
+        .value("MANTLE", EarthModelService::MANTLE)
+        .value("ROCK", EarthModelService::ROCK)
+        .value("ICE", EarthModelService::ICE)
+        .value("AIR", EarthModelService::AIR)
+        .value("VACUUM", EarthModelService::VACUUM)
+        .value("WATER", EarthModelService::WATER)
+        .value("LOWERMANTLE", EarthModelService::LOWERMANTLE)
+        .value("UPPERMANTLE", EarthModelService::UPPERMANTLE)
+        .value("LLSVP", EarthModelService::LLSVP)
+        .export_values();
+
+    // IceCapType enum
+    py::enum_<EarthModelService::IceCapType>(m, "IceCapType")
+        .value("NOICE", EarthModelService::NOICE)
+        .value("ICESHEET", EarthModelService::ICESHEET)
+        .value("SIMPLEICECAP", EarthModelService::SIMPLEICECAP)
+        .export_values();
+
+    // IntegType enum
+    py::enum_<EarthModelService::IntegType>(m, "IntegType")
+        .value("PATH", EarthModelService::PATH)
+        .value("RADIUS", EarthModelService::RADIUS)
+        .value("CIRCLE", EarthModelService::CIRCLE)
+        .value("SPHERE", EarthModelService::SPHERE)
+        .export_values();
+
+    // LeptonRangeOption enum
+    py::enum_<EarthModelCalculator::LeptonRangeOption>(m, "LeptonRangeOption")
+        .value("DEFAULT", EarthModelCalculator::DEFAULT)
+        .value("LEGACY", EarthModelCalculator::LEGACY)
+        .value("NUSIM", EarthModelCalculator::NUSIM)
+        .export_values();
+
+    // EarthParam class (nested class in EarthModelService)
+    py::class_<EarthModelService::EarthParam>(m, "EarthParam")
+        .def(py::init<>())
+        .def(py::init<const EarthModelService::EarthParam&>())
+        .def_readwrite("fUpperRadius_", &EarthModelService::EarthParam::fUpperRadius_)
+        .def_readwrite("fZOffset_", &EarthModelService::EarthParam::fZOffset_)
+        .def_readwrite("fBoundaryName_", &EarthModelService::EarthParam::fBoundaryName_)
+        .def_readwrite("fMediumType_", &EarthModelService::EarthParam::fMediumType_)
+        .def_readwrite("fParams_", &EarthModelService::EarthParam::fParams_)
+        .def("GetDensity", &EarthModelService::EarthParam::GetDensity,
+             "Evaluates the density within this shell at radius x [m], returns density in g/cm^3",
+             "x"_a)
+        .def("GetDensityGrad", &EarthModelService::EarthParam::GetDensityGrad,
+             "Evaluates the density gradient within this shell at radius x [m]",
+             "x"_a)
+        .def("PrintDensity", &EarthModelService::EarthParam::PrintDensity,
+             "Print density in density file format");
+
+    // EarthModelService class
+    py::class_<EarthModelService>(m, "EarthModelService")
+        .def(py::init<>())
+        .def(py::init<const std::string&, const std::string&,
+                      const std::vector<std::string>&, const std::vector<std::string>&,
+                      const std::string&, double, double>(),
+             "name"_a,
+             "tablepath"_a = "",
+             "earthmodels"_a = std::vector<std::string>(),
+             "materialmodels"_a = std::vector<std::string>(),
+             "icecapname"_a = "SimpleIceCap",
+             "icecapangle"_a = 20.0 * LeptonInjector::Constants::degrees,
+             "detectordepth"_a = 1948.0 * LeptonInjector::Constants::m)
+
+        // Static methods
+        .def_static("GetMediumTypeString", &EarthModelService::GetMediumTypeString,
+                    "Convert MediumType enum to string",
+                    "m"_a)
+        .def_static("ConvertMediumTypeString", &EarthModelService::ConvertMediumTypeString,
+                    "Convert string to MediumType enum",
+                    "s"_a)
+
+        // Density methods
+        .def("GetEarthParam", &EarthModelService::GetEarthParam,
+             py::return_value_policy::reference_internal,
+             "Finds the material layer containing position p_CE (Earth-centered coords)",
+             "p_CE"_a)
+        .def("GetDensityInCGS",
+             py::overload_cast<const LeptonInjector::LI_Position&>(&EarthModelService::GetDensityInCGS, py::const_),
+             "Computes material density at given point (detector-centered coords), returns g/cm^3",
+             "posi3"_a)
+        .def("GetEarthDensityInCGS",
+             py::overload_cast<const LeptonInjector::LI_Position&>(&EarthModelService::GetEarthDensityInCGS, py::const_),
+             "Computes material density at given point (Earth-centered coords), returns g/cm^3",
+             "p_CE"_a)
+
+        // Column depth methods
+        .def("GetColumnDepthInCGS", &EarthModelService::GetColumnDepthInCGS,
+             "Calculates total column depth from from_posI3 to to_posI3 (detector coords)",
+             "from_posI3"_a, "to_posI3"_a, "use_electron_density"_a = false)
+        .def("IntegrateDensityInCGS", &EarthModelService::IntegrateDensityInCGS,
+             "Integrate density from from_posCE to to_posCE (Earth-centered coords)",
+             "from_posCE"_a, "to_posCE"_a,
+             "intg_type"_a = EarthModelService::PATH,
+             "use_electron_density"_a = false)
+        .def("GetDensitySegments", &EarthModelService::GetDensitySegments,
+             "Get density segments along path (detector coords), returns list of (depth, radius, density) tuples",
+             "from_posI3"_a, "to_posI3"_a)
+        .def("GetEarthDensitySegments", &EarthModelService::GetEarthDensitySegments,
+             "Get density segments along path (Earth-centered coords), returns list of (depth, radius, density) tuples",
+             "from_posCE"_a, "to_posCE"_a)
+
+        // Distance/column depth conversion
+        .def("DistanceForColumnDepthToPoint", &EarthModelService::DistanceForColumnDepthToPoint,
+             "Distance along direction to accumulate column depth, ending at given point",
+             "to_posI3"_a, "dirI3"_a, "cDepth"_a, "use_electron_density"_a = false)
+        .def("DistanceForColumnDepthFromPoint", &EarthModelService::DistanceForColumnDepthFromPoint,
+             "Distance along direction to accumulate column depth, starting at given point",
+             "from_posI3"_a, "dirI3"_a, "cDepth"_a, "use_electron_density"_a = false)
+
+        // Lepton range methods
+        .def("GetLeptonRangeInMeterFrom", &EarthModelService::GetLeptonRangeInMeterFrom,
+             "Calculate lepton range in meters from start position",
+             "posI3"_a, "dirI3"_a, "energy"_a, "isTau"_a = false,
+             "opt"_a = EarthModelCalculator::DEFAULT, "scale"_a = 1.0)
+        .def("GetLeptonRangeInMeterTo", &EarthModelService::GetLeptonRangeInMeterTo,
+             "Calculate lepton range in meters to end position",
+             "posI3"_a, "dirI3"_a, "energy"_a, "isTau"_a = false,
+             "opt"_a = EarthModelCalculator::DEFAULT, "scale"_a = 1.0)
+
+        // Boundary crossing
+        .def("DistanceToNextBoundaryCrossing",
+             [](const EarthModelService& self, const LeptonInjector::LI_Position& posCE,
+                const LeptonInjector::LI_Direction& dirCE) {
+                 bool exitsAtmosphere = false;
+                 double dist = self.DistanceToNextBoundaryCrossing(posCE, dirCE, exitsAtmosphere);
+                 return std::make_pair(dist, exitsAtmosphere);
+             },
+             "Distance to next boundary crossing (Earth-centered coords), returns (distance, exitsAtmosphere)",
+             "posCE"_a, "dirCE"_a)
+
+        // Medium info
+        .def("GetMedium", &EarthModelService::GetMedium,
+             "Get medium type at position (Earth-centered coords)",
+             "p_CE"_a)
+
+        // Material ratios
+        .def("GetMatRatioMap",
+             py::overload_cast<>(&EarthModelService::GetMatRatioMap, py::const_),
+             "Get material ratio map (for GENIE)")
+        .def("GetPNERatioMap",
+             py::overload_cast<>(&EarthModelService::GetPNERatioMap, py::const_),
+             "Get proton/neutron/electron ratio map (for NuGen)")
+
+        // Geometry utilities
+        .def("GetDistanceFromEarthEntranceToDetector", &EarthModelService::GetDistanceFromEarthEntranceToDetector,
+             "Get track path length from Earth entrance to detector center",
+             "zenith_rad"_a)
+        .def("GetDistanceFromSphereSurfaceToDetector", &EarthModelService::GetDistanceFromSphereSurfaceToDetector,
+             "Get distances from sphere surface to detector",
+             "zenrad"_a, "radius"_a, "det_z"_a)
+
+        // Coordinate conversion
+        .def("GetEarthCoordPosFromDetCoordPos", &EarthModelService::GetEarthCoordPosFromDetCoordPos,
+             "Convert position from detector to Earth-centered coordinates",
+             "p"_a)
+        .def("GetDetCoordPosFromEarthCoordPos", &EarthModelService::GetDetCoordPosFromEarthCoordPos,
+             "Convert position from Earth-centered to detector coordinates",
+             "p"_a)
+        .def("GetEarthCoordDirFromDetCoordDir", &EarthModelService::GetEarthCoordDirFromDetCoordDir,
+             "Convert direction from detector to Earth-centered coordinates",
+             "p"_a)
+        .def("GetDetCoordDirFromEarthCoordDir", &EarthModelService::GetDetCoordDirFromEarthCoordDir,
+             "Convert direction from Earth-centered to detector coordinates",
+             "p"_a)
+
+        // Setters
+        .def("SetPath", &EarthModelService::SetPath,
+             "Set path of parameter files",
+             "s"_a)
+        .def("SetEarthModel", &EarthModelService::SetEarthModel,
+             "Set Earth model file(s)",
+             "s"_a)
+        .def("SetMaterialModel", &EarthModelService::SetMaterialModel,
+             "Set material model file(s)",
+             "s"_a)
+        .def("SetIceCapTypeString", &EarthModelService::SetIceCapTypeString,
+             "Set ice cap type ('NoIce', 'IceSheet', or 'SimpleIceCap')",
+             "s"_a)
+        .def("SetIceCapSimpleAngle", &EarthModelService::SetIceCapSimpleAngle,
+             "Set open angle of ice cap",
+             "cap_angle"_a)
+        .def("SetDetectorDepth", &EarthModelService::SetDetectorDepth,
+             "Set detector depth",
+             "d"_a)
+        .def("SetDetectorXY", &EarthModelService::SetDetectorXY,
+             "Set detector XY position",
+             "x"_a, "y"_a)
+
+        // Getters
+        .def("GetDetectorDepth", &EarthModelService::GetDetectorDepth,
+             "Get detector depth")
+        .def("GetDetectorPosInEarthCoord", &EarthModelService::GetDetectorPosInEarthCoord,
+             py::return_value_policy::reference_internal,
+             "Get detector position in Earth-centered coordinates")
+        .def("GetPath", &EarthModelService::GetPath,
+             py::return_value_policy::reference_internal,
+             "Get path to parameter files")
+        .def("GetIceCapTypeString", &EarthModelService::GetIceCapTypeString,
+             py::return_value_policy::reference_internal,
+             "Get ice cap type string")
+        .def("GetIceCapSimpleAngle", &EarthModelService::GetIceCapSimpleAngle,
+             "Get ice cap simple angle")
+        .def("GetBoundary", &EarthModelService::GetBoundary,
+             "Get boundary radius by name",
+             "s"_a)
+        .def("GetMohoBoundary", &EarthModelService::GetMohoBoundary,
+             "Get Moho boundary radius [m]")
+        .def("GetRockIceBoundary", &EarthModelService::GetRockIceBoundary,
+             "Get rock-ice boundary radius [m]")
+        .def("GetOutermostRockBoundary", &EarthModelService::GetOutermostRockBoundary,
+             "Get outermost rock boundary radius [m]")
+        .def("GetIceAirBoundary", &EarthModelService::GetIceAirBoundary,
+             "Get ice-air boundary radius [m]")
+        .def("GetEarthAirBoundary", &EarthModelService::GetEarthAirBoundary,
+             "Get Earth-air boundary radius [m]")
+        .def("GetAtmoRadius", &EarthModelService::GetAtmoRadius,
+             "Get atmosphere radius [m]")
+        .def("GetPREM", &EarthModelService::GetPREM,
+             "Get PREM density at radius r [m], returns g/cm^3",
+             "r"_a)
+        .def("RadiusToCosZen", &EarthModelService::RadiusToCosZen,
+             "Convert radius to cosine zenith of tangent line",
+             "r"_a)
+        .def("PrintEarthParams", &EarthModelService::PrintEarthParams,
+             "Print Earth parameters")
+        .def("Init", &EarthModelService::Init,
+             "Initialize the Earth model");
+
+    // EarthModelCalculator namespace functions
+    m.def("GetImpactParameter",
+          [](const LeptonInjector::LI_Position& p0, const LeptonInjector::LI_Direction& d) {
+              double t;
+              LeptonInjector::LI_Position p;
+              double impact = EarthModelCalculator::GetImpactParameter(p0, d, t, p);
+              return py::make_tuple(impact, t, p);
+          },
+          "Calculate impact parameter with respect to origin. Returns (impact_param, t, closest_pos)",
+          "p0"_a, "d"_a);
+
+    m.def("GetIntersectionsWithSphere",
+          [](const LeptonInjector::LI_Position& pos, const LeptonInjector::LI_Direction& dir, double r) {
+              LeptonInjector::LI_Position startPos, endPos;
+              int nIntersections = EarthModelCalculator::GetIntersectionsWithSphere(pos, dir, r, startPos, endPos);
+              return py::make_tuple(nIntersections, startPos, endPos);
+          },
+          "Get intersections between track and sphere. Returns (num_intersections, start_pos, end_pos)",
+          "pos"_a, "dir"_a, "r"_a);
+
+    m.def("GetDistsToIntersectionsWithSphere",
+          [](const LeptonInjector::LI_Position& pos, const LeptonInjector::LI_Direction& dir, double r) {
+              double enterDist, exitDist;
+              int nIntersections = EarthModelCalculator::GetDistsToIntersectionsWithSphere(pos, dir, r, enterDist, exitDist);
+              return py::make_tuple(nIntersections, enterDist, exitDist);
+          },
+          "Get distances to intersections with sphere. Returns (num_intersections, enter_dist, exit_dist)",
+          "pos"_a, "dir"_a, "r"_a);
+
+    m.def("GetLeptonRange", &EarthModelCalculator::GetLeptonRange,
+          "Get lepton range in m.w.e.",
+          "particle_energy"_a, "isTau"_a = false,
+          "option"_a = EarthModelCalculator::DEFAULT, "scale"_a = 1.0);
+
+    m.def("ColumnDepthCGStoMWE", &EarthModelCalculator::ColumnDepthCGStoMWE,
+          "Convert column depth from g/cm^2 to m.w.e.",
+          "cdep_CGS"_a);
+
+    m.def("MWEtoColumnDepthCGS", &EarthModelCalculator::MWEtoColumnDepthCGS,
+          "Convert column depth from m.w.e. to g/cm^2",
+          "range_MWE"_a);
 }
